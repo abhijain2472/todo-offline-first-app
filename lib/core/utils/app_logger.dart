@@ -69,7 +69,7 @@ class AppLogger {
       String emoji, String color, String category, String message) {
     if (kDebugMode) {
       final timestamp = _timeFormat.format(DateTime.now());
-      final categoryPadded = category.padRight(8);
+      final categoryPadded = category;
 
       // Format: [HH:mm:ss.SSS] 🔄 [CATEGORY] Message
       debugPrint('$color[$timestamp] $emoji [$categoryPadded]$_reset $message');

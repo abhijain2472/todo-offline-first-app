@@ -29,4 +29,7 @@ abstract class TodoRepository {
 
   /// Get real-time stream of todos
   Stream<List<Todo>> watchTodos();
+
+  /// Clear all local todo data (DEBUG)
+  Future<Either<Failure, void>> clearLocalData();
 }

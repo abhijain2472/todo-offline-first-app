@@ -12,9 +12,11 @@ class SyncResponseModel extends Equatable {
 
   factory SyncResponseModel.fromJson(Map<String, dynamic> json) {
     return SyncResponseModel(
-      timestamp: json['timestamp'],
-      changes:
-          (json['changes'] as List).map((e) => TodoModel.fromJson(e)).toList(),
+      timestamp: json['timestamp'] ?? DateTime.now().toIso8601String(),
+      changes: (json['changes'] as List?)
+              ?.map((e) => TodoModel.fromJson(e))
+              .toList() ??
+          [],
     );
   }
 

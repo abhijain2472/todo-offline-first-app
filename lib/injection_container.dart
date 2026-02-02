@@ -12,11 +12,13 @@ import './features/todo/data/datasources/todo_remote_data_source.dart';
 import './features/todo/data/datasources/todo_remote_data_source_impl.dart';
 import './features/todo/data/repositories/todo_repository_impl.dart';
 import './features/todo/domain/repositories/todo_repository.dart';
+import './features/todo/domain/usecases/clear_local_data.dart';
 import './features/todo/domain/usecases/create_todo.dart';
 import './features/todo/domain/usecases/delete_todo.dart';
 import './features/todo/domain/usecases/get_todos.dart';
 import './features/todo/domain/usecases/sync_todos.dart';
 import './features/todo/domain/usecases/update_todo.dart';
+import './features/todo/domain/usecases/watch_todos.dart';
 import './features/todo/presentation/bloc/todo_bloc.dart';
 
 final sl = GetIt.instance;
@@ -31,6 +33,8 @@ Future<void> init() async {
       updateTodo: sl(),
       deleteTodo: sl(),
       syncTodos: sl(),
+      watchTodos: sl(),
+      clearLocalData: sl(),
     ),
   );
 
@@ -40,6 +44,8 @@ Future<void> init() async {
   sl.registerLazySingleton(() => UpdateTodo(sl()));
   sl.registerLazySingleton(() => DeleteTodo(sl()));
   sl.registerLazySingleton(() => SyncTodos(sl()));
+  sl.registerLazySingleton(() => WatchTodos(sl()));
+  sl.registerLazySingleton(() => ClearLocalData(sl()));
 
   // Repository
   sl.registerLazySingleton<TodoRepository>(

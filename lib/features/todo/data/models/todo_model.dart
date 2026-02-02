@@ -14,15 +14,25 @@ class TodoModel extends Todo {
   });
 
   factory TodoModel.fromJson(Map<String, dynamic> json) {
+    // Helper to handle date parsing with safety
+    DateTime parseDate(dynamic date) {
+      if (date == null) return DateTime.now();
+      try {
+        return DateTime.parse(date.toString());
+      } catch (e) {
+        return DateTime.now();
+      }
+    }
+
     return TodoModel(
-      syncId: json['syncId'],
-      title: json['title'],
+      syncId: json['syncId'] ?? json['id'] ?? json['_id'] ?? '',
+      title: json['title'] ?? 'No Title',
       description: json['description'] ?? '',
-      isCompleted: json['isCompleted'] ?? false,
-      isDeleted: json['isDeleted'] ?? false,
-      version: json['version'] ?? 1,
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      isCompleted: json['isCompleted'] ?? json['completed'] ?? false,
+      isDeleted: json['isDeleted'] ?? json['deleted'] ?? false,
+      version: json['version'] ?? json['__v'] ?? 1,
+      createdAt: parseDate(json['createdAt'] ?? json['created_at']),
+      updatedAt: parseDate(json['updatedAt'] ?? json['updated_at']),
       isSynced: true, // Data from server is always synced
     );
   }

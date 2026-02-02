@@ -1,7 +1,7 @@
 /// API Constants
 class ApiConstants {
   // Base URL for the API
-  static const String baseUrl = 'http://localhost:3000/api';
+  static const String baseUrl = 'http://192.168.1.6:3000/api';
 
   // Endpoints
   static const String todos = '/todos';

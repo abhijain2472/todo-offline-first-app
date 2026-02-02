@@ -5,6 +5,9 @@ import '../bloc/todo_event.dart';
 import '../bloc/todo_state.dart';
 import './add_edit_todo_screen.dart';
 import '../widgets/todo_item_widget.dart';
+import 'package:drift_db_viewer/drift_db_viewer.dart';
+import '../../../../injection_container.dart';
+import '../../../../core/database/app_database.dart';
 
 class TodoListScreen extends StatelessWidget {
   const TodoListScreen({super.key});
@@ -16,9 +19,47 @@ class TodoListScreen extends StatelessWidget {
         title: const Text('Todo App'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.delete_sweep, color: Colors.redAccent),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Clear Local Data?'),
+                  content: const Text(
+                      'This will delete all todos from your local database. It is for testing sync from empty state.'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        context.read<TodoBloc>().add(ClearLocalDataEvent());
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Clear',
+                          style: TextStyle(color: Colors.red)),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.sync),
             onPressed: () {
               context.read<TodoBloc>().add(SyncTodosEvent());
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.storage),
+            onPressed: () {
+              final db = sl<AppDatabase>();
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => DriftDbViewer(db),
+                ),
+              );
             },
           ),
         ],
@@ -47,17 +88,22 @@ class TodoListScreen extends StatelessWidget {
                     onRefresh: () async {
                       context.read<TodoBloc>().add(SyncTodosEvent());
                     },
-                    child: ListView.builder(
+                    child: ListView.separated(
+                      padding: const EdgeInsets.all(8),
                       itemCount: state.todos.length,
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 4),
                       itemBuilder: (context, index) {
+                        final todo = state.todos[index];
                         return TodoItemWidget(
-                          todo: state.todos[index],
+                          key: ValueKey(todo.syncId),
+                          todo: todo,
                           onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (_) => AddEditTodoScreen(
-                                  todo: state.todos[index],
+                                  todo: todo,
                                 ),
                               ),
                             );

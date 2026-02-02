@@ -44,14 +44,7 @@ class TodoRepositoryImpl implements TodoRepository {
 
   @override
   Stream<List<Todo>> watchTodos() {
-    // In a real app with reactive DB (like streaming drift/sembast/sqlite),
-    // we would yield distinct streams here.
-    // For basic Sqflite, we can't easily stream DB changes unless we
-    // wrap the DB or use a reactive wrapper.
-    // For this MVP, we will rely on BLoC reloading data after events.
-    // Returning empty stream or simple implementation for now.
-    // TODO: Implement proper DB stream or use StreamController in Repository
-    return Stream.value([]);
+    return localDataSource.watchTodos().map((models) => models);
   }
 
   @override
@@ -138,6 +131,16 @@ class TodoRepositoryImpl implements TodoRepository {
       return const Right(null);
     } catch (e) {
       return Left(SyncFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> clearLocalData() async {
+    try {
+      await localDataSource.deleteAllTodos();
+      return const Right(null);
+    } catch (e) {
+      return Left(CacheFailure(e.toString()));
     }
   }
 }

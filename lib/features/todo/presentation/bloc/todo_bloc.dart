@@ -1,10 +1,13 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/utils/app_logger.dart';
+import '../../domain/usecases/clear_local_data.dart';
 import '../../domain/usecases/create_todo.dart';
 import '../../domain/usecases/delete_todo.dart';
 import '../../domain/usecases/get_todos.dart';
 import '../../domain/usecases/sync_todos.dart';
 import '../../domain/usecases/update_todo.dart';
+import '../../domain/usecases/watch_todos.dart';
 import './todo_event.dart';
 import './todo_state.dart';
 
@@ -14,6 +17,10 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
   final UpdateTodo updateTodo;
   final DeleteTodo deleteTodo;
   final SyncTodos syncTodos;
+  final WatchTodos watchTodos;
+  final ClearLocalData clearLocalData;
+
+  StreamSubscription? _todosSubscription;
 
   TodoBloc({
     required this.getTodos,
@@ -21,6 +28,8 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
     required this.updateTodo,
     required this.deleteTodo,
     required this.syncTodos,
+    required this.watchTodos,
+    required this.clearLocalData,
   }) : super(TodoInitial()) {
     on<LoadTodosEvent>(_onLoadTodos);
     on<AddTodoEvent>(_onAddTodo);
@@ -28,6 +37,8 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
     on<DeleteTodoEvent>(_onDeleteTodo);
     on<ToggleTodoCompletionEvent>(_onToggleTodoCompletion);
     on<SyncTodosEvent>(_onSyncTodos);
+    on<TodosUpdatedEvent>(_onTodosUpdated);
+    on<ClearLocalDataEvent>(_onClearLocalData);
   }
 
   Future<void> _onLoadTodos(
@@ -37,6 +48,7 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
     emit(TodoLoading());
     AppLogger.bloc('LoadTodos', 'Loading...');
 
+    // 1. Initial manual fetch
     final result = await getTodos();
 
     result.fold(
@@ -49,17 +61,32 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
         emit(TodoLoaded(todos: todos));
       },
     );
+
+    // 2. Start watching for changes
+    await _todosSubscription?.cancel();
+    _todosSubscription = watchTodos.call().listen((todos) {
+      add(TodosUpdatedEvent(todos));
+    });
+  }
+
+  void _onTodosUpdated(
+    TodosUpdatedEvent event,
+    Emitter<TodoState> emit,
+  ) {
+    AppLogger.bloc(
+        'TodosUpdated', 'Reactive update: ${event.todos.length} todos');
+    final currentState = state;
+    if (currentState is TodoLoaded) {
+      emit(currentState.copyWith(todos: event.todos));
+    } else {
+      emit(TodoLoaded(todos: event.todos));
+    }
   }
 
   Future<void> _onAddTodo(
     AddTodoEvent event,
     Emitter<TodoState> emit,
   ) async {
-    final currentState = state;
-    if (currentState is TodoLoaded) {
-      // Optimistic update could go here, but we rely on repository return
-    }
-
     AppLogger.bloc('AddTodo', 'Adding: ${event.title}');
 
     final result = await createTodo(
@@ -71,7 +98,7 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
       (failure) => emit(TodoError(failure.message)),
       (todo) {
         AppLogger.bloc('AddTodo', 'Success');
-        add(LoadTodosEvent()); // Reload to get fresh list
+        // No manual reload needed, stream will handle it
       },
     );
   }
@@ -88,7 +115,7 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
       (failure) => emit(TodoError(failure.message)),
       (_) {
         AppLogger.bloc('UpdateTodo', 'Success');
-        add(LoadTodosEvent());
+        // No manual reload needed, stream will handle it
       },
     );
   }
@@ -105,7 +132,7 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
       (failure) => emit(TodoError(failure.message)),
       (_) {
         AppLogger.bloc('DeleteTodo', 'Success');
-        add(LoadTodosEvent());
+        // No manual reload needed, stream will handle it
       },
     );
   }
@@ -148,8 +175,30 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
         if (state is TodoLoaded) {
           emit((state as TodoLoaded).copyWith(isSyncing: false));
         }
-        add(LoadTodosEvent()); // Refresh data after sync
+        // No manual reload needed, stream will handle it
       },
     );
+  }
+
+  Future<void> _onClearLocalData(
+    ClearLocalDataEvent event,
+    Emitter<TodoState> emit,
+  ) async {
+    AppLogger.bloc('ClearLocalData', 'Wiping all local data...');
+    final result = await clearLocalData();
+    result.fold(
+      (failure) => emit(TodoError(failure.message)),
+      (_) {
+        AppLogger.bloc('ClearLocalData', 'Success');
+        emit(TodoInitial()); // Reset to initial state
+        add(LoadTodosEvent()); // Re-init stream/loading
+      },
+    );
+  }
+
+  @override
+  Future<void> close() {
+    _todosSubscription?.cancel();
+    return super.close();
   }
 }

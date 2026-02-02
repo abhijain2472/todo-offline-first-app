@@ -57,3 +57,16 @@ class ToggleTodoCompletionEvent extends TodoEvent {
 
 /// Event to manually trigger sync
 class SyncTodosEvent extends TodoEvent {}
+
+/// Event triggered when the underlying data source changes (via stream)
+class TodosUpdatedEvent extends TodoEvent {
+  final List<Todo> todos;
+
+  const TodosUpdatedEvent(this.todos);
+
+  @override
+  List<Object?> get props => [todos];
+}
+
+/// Event to clear all local data (DEBUG)
+class ClearLocalDataEvent extends TodoEvent {}

@@ -26,10 +26,13 @@ class _AddEditTodoScreenState extends State<AddEditTodoScreen> {
         TextEditingController(text: widget.todo?.description ?? '');
   }
 
+  final _descriptionFocusNode = FocusNode();
+
   @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
+    _descriptionFocusNode.dispose();
     super.dispose();
   }
 
@@ -61,50 +64,72 @@ class _AddEditTodoScreenState extends State<AddEditTodoScreen> {
   Widget build(BuildContext context) {
     final isEditing = widget.todo != null;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(isEditing ? 'Edit Todo' : 'Add Todo'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Title',
-                  hintText: 'What needs to be done?',
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(isEditing ? 'Edit Todo' : 'Add Todo'),
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                TextFormField(
+                  controller: _titleController,
+                  textInputAction: TextInputAction.next,
+                  decoration: const InputDecoration(
+                    labelText: 'Title',
+                    hintText: 'What needs to be done?',
+                    prefixIcon: Icon(Icons.title),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Title is required';
+                    }
+                    return null;
+                  },
+                  onFieldSubmitted: (_) {
+                    FocusScope.of(context).requestFocus(_descriptionFocusNode);
+                  },
+                  autofocus: !isEditing,
                 ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Title is required';
-                  }
-                  return null;
-                },
-                autofocus: !isEditing,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description',
-                  hintText: 'Add some details (optional)',
-                  alignLabelWithHint: true,
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _descriptionController,
+                  focusNode: _descriptionFocusNode,
+                  textInputAction: TextInputAction.done,
+                  decoration: const InputDecoration(
+                    labelText: 'Description',
+                    hintText: 'Add some details (optional)',
+                    alignLabelWithHint: true,
+                    prefixIcon: Icon(Icons.description),
+                  ),
+                  maxLines: 3,
+                  onFieldSubmitted: (_) => _saveTodo(),
                 ),
-                maxLines: 3,
-              ),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: _saveTodo,
-                  icon: Icon(isEditing ? Icons.save : Icons.add),
-                  label: Text(isEditing ? 'Save Changes' : 'Create Todo'),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: FilledButton.icon(
+                    onPressed: _saveTodo,
+                    icon: Icon(isEditing ? Icons.save : Icons.add),
+                    label: Text(
+                      isEditing ? 'Save Changes' : 'Create Todo',
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    style: FilledButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

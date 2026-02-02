@@ -19,6 +19,14 @@ class TodoLocalDataSourceImpl implements TodoLocalDataSource {
   }
 
   @override
+  Stream<List<TodoModel>> watchTodos() {
+    AppLogger.database('WATCH', 'Watching non-deleted todos');
+    return (db.select(db.todos)..where((t) => t.isDeleted.equals(false)))
+        .watch()
+        .map((rows) => rows.map((e) => _mapToModel(e)).toList());
+  }
+
+  @override
   Future<void> saveTodo(TodoModel todo) async {
     AppLogger.database('UPSERT', 'Saving todo: ${todo.syncId}');
     await db.into(db.todos).insertOnConflictUpdate(
@@ -42,6 +50,12 @@ class TodoLocalDataSourceImpl implements TodoLocalDataSource {
     await (db.update(db.todos)..where((t) => t.syncId.equals(syncId))).write(
       const TodosCompanion(isDeleted: Value(true), isSynced: Value(false)),
     );
+  }
+
+  @override
+  Future<void> deleteAllTodos() async {
+    AppLogger.database('DELETE_ALL', 'Wiping all local todos');
+    await db.delete(db.todos).go();
   }
 
   @override

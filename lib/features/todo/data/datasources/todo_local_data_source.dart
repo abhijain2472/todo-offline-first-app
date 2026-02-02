@@ -23,6 +23,12 @@ abstract class TodoLocalDataSource {
   /// Save last sync timestamp
   Future<void> cacheLastSyncTime(String timestamp);
 
+  /// Watch todos for changes
+  Stream<List<TodoModel>> watchTodos();
+
+  /// Delete all todos from local database (DEBUG)
+  Future<void> deleteAllTodos();
+
   /// Delete a todo permanently (from local cache if needed, though usually we keep soft deleted)
   /// But for sync cleanup, we might need it. For now, strictly soft delete.
 }
