@@ -30,8 +30,8 @@ graph TD
 
     subgraph "Data Layer"
         RepoImpl[Repository Implementation]
-        LDS[Local Data Source (Drift/SQLite)]
-        RDS[Remote Data Source (HTTP/Client)]
+        LDS["Local Data Source (Drift/SQLite)"]
+        RDS["Remote Data Source (HTTP/Client)"]
         SyncMgr[Sync Manager]
     end
 
@@ -59,10 +59,10 @@ The `SyncManager` coordinates the complex dance between local and remote data. I
 
 ```mermaid
 sequenceDiagram
-    participant App as Flutter App
-    participant SM as SyncManager
-    participant LDS as Local DB (Drift)
-    participant RDS as Remote API
+    participant App as "Flutter App"
+    participant SM as "SyncManager"
+    participant LDS as "Local DB (Drift)"
+    participant RDS as "Remote API"
 
     App->>SM: Trigger Sync
     SM->>SM: check _isSyncing flag
