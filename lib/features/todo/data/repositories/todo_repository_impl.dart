@@ -44,7 +44,7 @@ class TodoRepositoryImpl implements TodoRepository {
 
   @override
   Stream<List<Todo>> watchTodos() {
-    return localDataSource.watchTodos().map((models) => models);
+    return localDataSource.watchTodos();
   }
 
   @override
@@ -92,7 +92,7 @@ class TodoRepositoryImpl implements TodoRepository {
         description: todo.description,
         isCompleted: todo.isCompleted,
         isDeleted: todo.isDeleted,
-        version: todo.version,
+        version: todo.version + 1, // Increment version for conflict resolution
         createdAt: todo.createdAt,
         updatedAt: DateTime.now(), // Update local timestamp
         isSynced: false, // Mark unsynced

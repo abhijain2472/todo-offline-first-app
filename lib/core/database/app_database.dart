@@ -33,8 +33,22 @@ class SyncMetadata extends Table {
   Set<Column> get primaryKey => {key};
 }
 
+enum SyncAction { create, update, delete }
+
+/// SyncOutbox table definition
+@DataClassName('SyncOutboxTableData')
+class SyncOutbox extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get syncId => text()();
+  TextColumn get action => textEnum<SyncAction>()();
+  TextColumn get payload => text()(); // JSON string
+  IntColumn get retryCount => integer().withDefault(const Constant(0))();
+  TextColumn get lastError => text().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+}
+
 /// AppDatabase class
-@DriftDatabase(tables: [Todos, SyncMetadata])
+@DriftDatabase(tables: [Todos, SyncMetadata, SyncOutbox])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 

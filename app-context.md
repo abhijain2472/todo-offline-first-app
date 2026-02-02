@@ -53,23 +53,29 @@ The app uses a robust sync mechanism to ensure data consistency between the mobi
 ### Key Concepts:
 - **`syncId`**: A client-generated UUID used as the primary identifier across both local and remote databases.
 - **Soft Delete**: Todos are marked with `isDeleted = true` instead of being removed immediately.
-- **`isSynced` Flag**: Tracks whether local changes have been successfully pushed to the server.
-- **Version Tracking**: Uses a `version` field for conflict resolution (higher version wins).
+- **`isSynced` Flag**: A local-only flag used for UI indicators (e.g., cloud icon). *It is no longer the primary source of truth for synchronization.*
+- **Version Tracking**: Every user update increments the `version` field locally. The Outbox uses this version to distinguish between `create` (v1) and `update` (v>1) actions.
+- **Conflict Resilience**: The sync engine handles "Already Exists" and "404 Not Found" errors gracefully, treating them as successful pushes to prevent queue blockage.
 - **Auto-Sync**: The app automatically triggers a sync when moving from **Offline to Online**.
 
 ### Sync Flow (`SyncManager`):
-1. **Push**: Gathers all todos where `isSynced = false`.
-   - Creation: `POST /todos`.
-   - Updates: `PATCH /todos/:id`.
-   - Deletes: `DELETE /todos/:id`.
-2. **Pull**:
+1. **Outbox Pattern**: Instead of scanning the `todos` table, the app maintains a **`SyncOutbox`** table (Transactional Outbox Pattern).
+2. **Push**:
+   - Every local write (create/update/delete) is part of a transaction that also writes an "action" and the "full JSON payload" to the Outbox.
+   - `SyncManager` processes these actions sequentially.
+   - Actions are deleted from the Outbox only after a successful network response.
+   - Failed actions track `retryCount` and `lastError` for robustness.
+3. **Pull**:
    - Calls `GET /todos/sync?since=<last_sync_time>`.
-   - Merges changes into the local Drift database.
+   - Merges changes into the local Drift database using **`upsertTodo`** (Server wins).
+   - `upsertTodo` is a local-only write that skips the Outbox to prevent infinite sync loops.
    - Updates the `lastSyncTime` locally.
 
 ---
 
-## 📊 Data Schema Highlights (`Todo` Entity)
+## 📊 Data Schema Highlights
+
+### `Todo` Table
 - `syncId` (String): UUID
 - `title` (String)
 - `description` (String)
@@ -78,4 +84,13 @@ The app uses a robust sync mechanism to ensure data consistency between the mobi
 - `version` (Integer)
 - `createdAt` (DateTime)
 - `updatedAt` (DateTime)
-- `isSynced` (Boolean) - *Local Database Only*
+- `isSynced` (Boolean) - *Local UI state only*
+
+### `SyncOutbox` Table
+- `id` (Integer): Auto-increment PK
+- `syncId` (String)
+- `action` (Enum): `create` | `update` | `delete` (Stored as Text)
+- `payload` (String): Full JSON snapshot
+- `retryCount` (Integer)
+- `lastError` (String)
+- `createdAt` (DateTime)

@@ -27,8 +27,8 @@ class TodoLocalDataSourceImpl implements TodoLocalDataSource {
   }
 
   @override
-  Future<void> saveTodo(TodoModel todo) async {
-    AppLogger.database('UPSERT', 'Saving todo: ${todo.syncId}');
+  Future<void> upsertTodo(TodoModel todo) async {
+    AppLogger.database('UPSERT', 'Local-only write for: ${todo.syncId}');
     await db.into(db.todos).insertOnConflictUpdate(
           TodosCompanion.insert(
             syncId: todo.syncId,
@@ -45,34 +45,102 @@ class TodoLocalDataSourceImpl implements TodoLocalDataSource {
   }
 
   @override
+  Future<void> saveTodo(TodoModel todo) async {
+    AppLogger.database(
+        'TRANSACTION', 'Starting atomic save for: ${todo.syncId}');
+
+    await db.transaction(() async {
+      // 1. Save to main table
+      await upsertTodo(todo);
+
+      // 2. Add to Outbox
+      final action = todo.version == 1 ? SyncAction.create : SyncAction.update;
+      await db.into(db.syncOutbox).insert(
+            SyncOutboxCompanion.insert(
+              syncId: todo.syncId,
+              action: action,
+              payload: todo.toJsonString(),
+              createdAt: DateTime.now(),
+            ),
+          );
+      AppLogger.database('OUTBOX', 'Added $action action for ${todo.syncId}');
+    });
+  }
+
+  @override
   Future<void> deleteTodo(String syncId) async {
-    AppLogger.database('SOFT_DELETE', 'Marking todo as deleted: $syncId');
-    await (db.update(db.todos)..where((t) => t.syncId.equals(syncId))).write(
-      const TodosCompanion(isDeleted: Value(true), isSynced: Value(false)),
-    );
+    AppLogger.database(
+        'TRANSACTION', 'Starting atomic soft-delete for: $syncId');
+
+    await db.transaction(() async {
+      // 1. Mark as deleted in main table
+      final todoRows = await (db.select(db.todos)
+            ..where((t) => t.syncId.equals(syncId)))
+          .get();
+      if (todoRows.isEmpty) return;
+
+      final currentTodo = _mapToModel(todoRows.first);
+      final deletedTodo = currentTodo.copyWith(
+          isDeleted: true, isSynced: false, updatedAt: DateTime.now());
+
+      await (db.update(db.todos)..where((t) => t.syncId.equals(syncId))).write(
+        TodosCompanion(
+          isDeleted: const Value(true),
+          isSynced: const Value(false),
+          updatedAt: Value(deletedTodo.updatedAt),
+        ),
+      );
+
+      // 2. Add 'delete' action to Outbox
+      await db.into(db.syncOutbox).insert(
+            SyncOutboxCompanion.insert(
+              syncId: syncId,
+              action: SyncAction.delete,
+              payload: deletedTodo.toJsonString(),
+              createdAt: DateTime.now(),
+            ),
+          );
+      AppLogger.database('OUTBOX', 'Added delete action for $syncId');
+    });
   }
 
   @override
   Future<void> deleteAllTodos() async {
-    AppLogger.database('DELETE_ALL', 'Wiping all local todos');
-    await db.delete(db.todos).go();
+    AppLogger.database('DELETE_ALL', 'Wiping all local todos and outbox');
+    await db.transaction(() async {
+      await db.delete(db.todos).go();
+      await db.delete(db.syncOutbox).go();
+    });
   }
 
   @override
-  Future<List<TodoModel>> getUnsyncedTodos() async {
-    AppLogger.database('QUERY', 'Fetching unsynced todos');
-    final results = await (db.select(db.todos)
-          ..where((t) => t.isSynced.equals(false)))
-        .get();
-    return results.map((e) => _mapToModel(e)).toList();
+  Future<List<SyncOutboxTableData>> getPendingSyncActions() async {
+    AppLogger.database('QUERY', 'Fetching pending actions from outbox');
+    return await db.select(db.syncOutbox).get();
   }
 
   @override
-  Future<void> markAsSynced(String syncId) async {
-    AppLogger.database('SYNC_UPDATE', 'Marking todo as synced: $syncId');
-    await (db.update(db.todos)..where((t) => t.syncId.equals(syncId))).write(
-      const TodosCompanion(isSynced: Value(true)),
+  Future<void> removeFromOutbox(int id) async {
+    AppLogger.database('OUTBOX_CLEAN', 'Removing action $id from outbox');
+    await (db.delete(db.syncOutbox)..where((t) => t.id.equals(id))).go();
+  }
+
+  @override
+  Future<void> updateOutboxError(int id, String error) async {
+    AppLogger.database('OUTBOX_ERROR', 'Updating error for action $id');
+    await (db.update(db.syncOutbox)..where((t) => t.id.equals(id))).write(
+      SyncOutboxCompanion(
+        lastError: Value(error),
+        retryCount: Value(await _getNextRetryCount(id)),
+      ),
     );
+  }
+
+  Future<int> _getNextRetryCount(int id) async {
+    final entry = await (db.select(db.syncOutbox)
+          ..where((t) => t.id.equals(id)))
+        .getSingle();
+    return entry.retryCount + 1;
   }
 
   @override
@@ -90,6 +158,15 @@ class TodoLocalDataSourceImpl implements TodoLocalDataSource {
     await db.into(db.syncMetadata).insertOnConflictUpdate(
           SyncMetadataCompanion.insert(key: 'last_sync_time', value: timestamp),
         );
+  }
+
+  @override
+  Future<void> markAsSynced(String syncId) async {
+    AppLogger.database(
+        'SYNC_UPDATE', 'Marking todo as synced in main table: $syncId');
+    await (db.update(db.todos)..where((t) => t.syncId.equals(syncId))).write(
+      const TodosCompanion(isSynced: Value(true)),
+    );
   }
 
   /// Helper to map Drift generated data class to our TodoModel

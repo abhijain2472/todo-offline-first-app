@@ -3,6 +3,8 @@
 A robust, production-ready Flutter Todo application showcasing an **Offline-First Architecture** with real-time synchronization.
 
 ## 🚀 Key Features
+- **Transactional Outbox Pattern**: Robust synchronization using a dedicated queue with full JSON payloads and retry tracking.
+- **Resilient Sync Engine**: Graceful handling of network conflicts (e.g., "Already Exists"/404) and automatic version incrementing for deterministic conflict resolution.
 - **Offline-First**: Local storage is the primary source of truth. All user actions are instant and work without internet.
 - **Smart Synchronization**: Bidirectional sync between local SQLite and remote API.
 - **Conflict Resolution**: Version-based merging to ensure data integrity.
@@ -69,18 +71,20 @@ sequenceDiagram
     
     rect rgb(240, 240, 240)
     Note over SM, RDS: Phase 1: Push Local Changes
-    SM->>LDS: fetchUnsyncedTodos()
-    LDS-->>SM: List of dirty records
-    loop for each todo
-        alt isDeleted
+    SM->>LDS: getPendingSyncActions()
+    LDS-->>SM: List of Outbox entries (Action + Payload)
+    loop for each action entry
+        SM->>SM: TodoModel.fromJsonString(payload)
+        alt SyncAction.delete
             SM->>RDS: DELETE /todos/{id}
-        else model.version == 1
+        else SyncAction.create
             SM->>RDS: POST /todos
-        else update
+        else SyncAction.update
             SM->>RDS: PATCH /todos/{id}
         end
         RDS-->>SM: synced model
-        SM->>LDS: update(isSynced: true)
+        SM->>LDS: markAsSynced(syncId)
+        SM->>LDS: removeFromOutbox(id)
     end
     end
 
@@ -92,7 +96,7 @@ sequenceDiagram
     RDS-->>SM: List of remote changes
     loop for each remote change
         SM->>SM: _processRemoteChange()
-        SM->>LDS: saveTodo(marked_synced)
+        SM->>LDS: upsertTodo(remote_todo)
     end
     SM->>LDS: cacheLastSyncTime(new_timestamp)
     end

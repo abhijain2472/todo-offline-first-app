@@ -1,5 +1,6 @@
 import 'dart:async';
 import '../network/network_info.dart';
+import '../database/app_database.dart';
 import '../utils/app_logger.dart';
 import '../../features/todo/data/datasources/todo_local_data_source.dart';
 import '../../features/todo/data/datasources/todo_remote_data_source.dart';
@@ -121,49 +122,89 @@ class SyncManager {
   /// Internal push logic
   Future<void> _internalPushLocalChanges() async {
     try {
-      final unsyncedTodos = await localDataSource.getUnsyncedTodos();
-      if (unsyncedTodos.isEmpty) {
-        AppLogger.sync('PUSH', 'No local changes found to push');
+      final pendingActions = await localDataSource.getPendingSyncActions();
+      if (pendingActions.isEmpty) {
+        AppLogger.sync('PUSH', 'No pending actions in outbox');
         return;
       }
 
-      AppLogger.sync('PUSH', 'Pushing ${unsyncedTodos.length} unsynced todos');
-      for (final todo in unsyncedTodos) {
-        await _pushSingleTodo(todo);
+      AppLogger.sync(
+          'PUSH', 'Processing ${pendingActions.length} actions from outbox');
+      for (final action in pendingActions) {
+        await _processOutboxAction(action);
       }
     } catch (e) {
       AppLogger.error('Bulk push failed', category: 'SYNC', error: e);
     }
   }
 
-  /// Handles pushing a single todo to the server
-  Future<void> _pushSingleTodo(TodoModel todo) async {
+  /// Processes a single action from the outbox
+  Future<void> _processOutboxAction(SyncOutboxTableData actionEntry) async {
+    final todo = TodoModel.fromJsonString(actionEntry.payload);
+    final action = actionEntry.action;
+
     try {
+      AppLogger.sync('PUSH_ACTION', 'Processing $action for ${todo.syncId}');
+
       TodoModel? syncedTodo;
-
-      if (todo.isDeleted) {
-        await _handleRemoteDelete(todo);
-      } else if (_isNewTodo(todo)) {
-        syncedTodo = await _handleRemoteCreate(todo);
+      if (action == SyncAction.delete) {
+        try {
+          await _handleRemoteDelete(todo);
+        } catch (e) {
+          if (e.toString().contains('not found') ||
+              e.toString().contains('404')) {
+            AppLogger.sync('CONFLICT',
+                'Todo ${todo.syncId} already deleted on server, treating as success');
+          } else {
+            rethrow;
+          }
+        }
+      } else if (action == SyncAction.create) {
+        try {
+          syncedTodo = await _handleRemoteCreate(todo);
+        } catch (e) {
+          final errorStr = e.toString().toLowerCase();
+          if (errorStr.contains('already exists') ||
+              errorStr.contains('409') ||
+              errorStr.contains('conflict')) {
+            AppLogger.sync('CONFLICT',
+                'Todo ${todo.syncId} already exists on server, treating as success');
+            syncedTodo = todo;
+          } else {
+            rethrow;
+          }
+        }
       } else {
-        syncedTodo = await _handleRemoteUpdate(todo);
+        try {
+          syncedTodo = await _handleRemoteUpdate(todo);
+        } catch (e) {
+          if (e.toString().contains('not found') ||
+              e.toString().contains('404')) {
+            AppLogger.sync('CONFLICT',
+                'Todo ${todo.syncId} not found on server during update, attempting creation instead');
+            syncedTodo = await _handleRemoteCreate(todo);
+          } else {
+            rethrow;
+          }
+        }
       }
 
+      // 1. If we got a response (create/update), update the main table to mark as synced
       if (syncedTodo != null) {
-        await localDataSource.saveTodo(syncedTodo.copyWith(isSynced: true));
-      } else if (todo.isDeleted) {
-        await localDataSource.markAsSynced(todo.syncId);
+        await localDataSource.markAsSynced(syncedTodo.syncId);
       }
 
-      AppLogger.sync('PUSH_SUCCESS', 'Synced ${todo.syncId}');
+      // 2. Remove from outbox on successful completion (including delete)
+      await localDataSource.removeFromOutbox(actionEntry.id);
+
+      AppLogger.sync('PUSH_SUCCESS',
+          'Successfully processed ${actionEntry.action} for ${todo.syncId}');
     } catch (e) {
-      AppLogger.error('Push failed for ${todo.syncId}',
+      AppLogger.error('Action failed for ${todo.syncId}',
           category: 'SYNC', error: e);
+      await localDataSource.updateOutboxError(actionEntry.id, e.toString());
     }
   }
-
-  bool _isNewTodo(TodoModel todo) =>
-      todo.version == 1 && todo.createdAt == todo.updatedAt;
 
   Future<void> _handleRemoteDelete(TodoModel todo) async {
     AppLogger.sync('PUSH_DELETE', 'Deleting ${todo.syncId}');
@@ -207,6 +248,6 @@ class SyncManager {
 
   Future<void> _processRemoteChange(TodoModel remoteTodo) async {
     AppLogger.sync('MERGE', 'Remote update for "${remoteTodo.title}"');
-    await localDataSource.saveTodo(remoteTodo); // Server wins
+    await localDataSource.upsertTodo(remoteTodo); // Server wins
   }
 }

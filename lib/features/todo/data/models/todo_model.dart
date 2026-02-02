@@ -1,3 +1,4 @@
+import 'dart:convert';
 import '../../domain/entities/todo.dart';
 
 class TodoModel extends Todo {
@@ -12,6 +13,11 @@ class TodoModel extends Todo {
     required super.updatedAt,
     super.isSynced = false,
   });
+
+  factory TodoModel.fromJsonString(String source) =>
+      TodoModel.fromJson(json.decode(source));
+
+  String toJsonString() => json.encode(toJson());
 
   factory TodoModel.fromJson(Map<String, dynamic> json) {
     // Helper to handle date parsing with safety
