@@ -3,10 +3,6 @@ class ApiConstants {
   // Base URL for the API
   static const String baseUrl = 'http://192.168.1.6:3000/api';
 
-  // Endpoints
-  static const String todos = '/todos';
-  static const String sync = '/todos/sync';
-
   // Headers
   static const Map<String, String> headers = {
     'Content-Type': 'application/json',
@@ -15,6 +11,12 @@ class ApiConstants {
   // Timeouts
   static const Duration connectionTimeout = Duration(seconds: 30);
   static const Duration receiveTimeout = Duration(seconds: 30);
+}
+
+/// API Endpoints
+class Apis {
+  static const String todos = '/todos';
+  static const String sync = '/todos/sync';
 }
 
 /// Database Constants

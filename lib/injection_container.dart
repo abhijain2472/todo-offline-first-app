@@ -5,6 +5,9 @@ import 'package:uuid/uuid.dart';
 import './core/database/app_database.dart';
 import './core/network/network_info.dart';
 import './core/network/network_info_impl.dart';
+import './core/network/network_client.dart';
+import './core/network/http_network_client.dart';
+import './core/constants/constants.dart';
 import './core/sync/sync_manager.dart';
 import './features/todo/data/datasources/todo_local_data_source.dart';
 import './features/todo/data/datasources/todo_local_data_source_impl.dart';
@@ -69,6 +72,13 @@ Future<void> init() async {
 
   sl.registerLazySingleton<NetworkInfo>(
     () => NetworkInfoImpl(sl()),
+  );
+
+  sl.registerLazySingleton<NetworkClient>(
+    () => HttpNetworkClient(
+      client: sl(),
+      baseUrl: ApiConstants.baseUrl,
+    ),
   );
 
   sl.registerLazySingleton(() => AppDatabase());

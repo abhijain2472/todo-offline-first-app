@@ -50,7 +50,7 @@ class AppLogger {
   static void api(String endpoint, String method,
       {dynamic data, int? statusCode}) {
     final dataStr = data != null ? ' → Data: $data' : '';
-    final statusStr = statusCode != null ? ' (${statusCode})' : '';
+    final statusStr = statusCode != null ? ' ($statusCode)' : '';
     _log('🌐', _green, 'API', '$method $endpoint$statusStr$dataStr');
   }
 

@@ -23,12 +23,37 @@ class SyncManager {
       StreamController<SyncStatus>.broadcast();
 
   bool _isSyncing = false;
+  StreamSubscription? _networkSubscription;
+  final DateTime _managerStartTime = DateTime.now();
 
   SyncManager({
     required this.remoteDataSource,
     required this.localDataSource,
     required this.networkInfo,
-  });
+  }) {
+    // Automatically trigger sync when network recovers
+    _networkSubscription =
+        networkInfo.onConnectivityChanged.listen((isConnected) {
+      if (isConnected) {
+        // Only trigger auto-sync if we have "settled" after startup.
+        // This avoids jitter where connectivity_plus reports [none, wifi] on boot.
+        final secondsSinceStartup =
+            DateTime.now().difference(_managerStartTime).inSeconds;
+
+        if (secondsSinceStartup > 3) {
+          AppLogger.sync('AUTO', 'Network recovered, triggering sync');
+          sync();
+        } else {
+          AppLogger.sync('SKIP', 'Ignoring startup network jitter');
+        }
+      }
+    });
+  }
+
+  void dispose() {
+    _networkSubscription?.cancel();
+    _syncStatusController.close();
+  }
 
   Stream<SyncStatus> get syncStatusStream => _syncStatusController.stream;
 
@@ -93,54 +118,69 @@ class SyncManager {
     }
   }
 
-  /// Internal push logic without _isSyncing check
+  /// Internal push logic
   Future<void> _internalPushLocalChanges() async {
     try {
       final unsyncedTodos = await localDataSource.getUnsyncedTodos();
-
       if (unsyncedTodos.isEmpty) {
         AppLogger.sync('PUSH', 'No local changes found to push');
         return;
       }
 
-      AppLogger.sync('PUSH', 'Found ${unsyncedTodos.length} unsynced todos');
-
+      AppLogger.sync('PUSH', 'Pushing ${unsyncedTodos.length} unsynced todos');
       for (final todo in unsyncedTodos) {
-        try {
-          TodoModel syncedTodo;
-
-          if (todo.isDeleted) {
-            AppLogger.sync(
-                'PUSH_DELETE', 'Deleting todo on server: ${todo.syncId}');
-            await remoteDataSource.deleteTodo(todo.syncId);
-            await localDataSource.markAsSynced(todo.syncId);
-            continue;
-          } else if (todo.version == 1 && todo.createdAt == todo.updatedAt) {
-            AppLogger.sync(
-                'PUSH_CREATE', 'Creating todo on server: ${todo.title}');
-            syncedTodo = await remoteDataSource.createTodo(todo);
-          } else {
-            AppLogger.sync(
-                'PUSH_UPDATE', 'Updating todo on server: ${todo.title}');
-            syncedTodo = await remoteDataSource.updateTodo(todo);
-          }
-
-          // Update local with server response (which includes server version/timestamps)
-          await localDataSource.saveTodo(syncedTodo.copyWith(isSynced: true));
-          AppLogger.sync('PUSH_SUCCESS', 'Successfully pushed ${todo.syncId}');
-        } catch (e) {
-          AppLogger.error('Failed to push individual todo ${todo.syncId}',
-              category: 'SYNC', error: e);
-          // Continue with next todo
-        }
+        await _pushSingleTodo(todo);
       }
     } catch (e) {
-      AppLogger.error('Internal push local changes failed',
+      AppLogger.error('Bulk push failed', category: 'SYNC', error: e);
+    }
+  }
+
+  /// Handles pushing a single todo to the server
+  Future<void> _pushSingleTodo(TodoModel todo) async {
+    try {
+      TodoModel? syncedTodo;
+
+      if (todo.isDeleted) {
+        await _handleRemoteDelete(todo);
+      } else if (_isNewTodo(todo)) {
+        syncedTodo = await _handleRemoteCreate(todo);
+      } else {
+        syncedTodo = await _handleRemoteUpdate(todo);
+      }
+
+      if (syncedTodo != null) {
+        await localDataSource.saveTodo(syncedTodo.copyWith(isSynced: true));
+      } else if (todo.isDeleted) {
+        await localDataSource.markAsSynced(todo.syncId);
+      }
+
+      AppLogger.sync('PUSH_SUCCESS', 'Synced ${todo.syncId}');
+    } catch (e) {
+      AppLogger.error('Push failed for ${todo.syncId}',
           category: 'SYNC', error: e);
     }
   }
 
-  /// Internal pull logic without _isSyncing check
+  bool _isNewTodo(TodoModel todo) =>
+      todo.version == 1 && todo.createdAt == todo.updatedAt;
+
+  Future<void> _handleRemoteDelete(TodoModel todo) async {
+    AppLogger.sync('PUSH_DELETE', 'Deleting ${todo.syncId}');
+    await remoteDataSource.deleteTodo(todo.syncId);
+  }
+
+  Future<TodoModel> _handleRemoteCreate(TodoModel todo) async {
+    AppLogger.sync('PUSH_CREATE', 'Creating "${todo.title}"');
+    return await remoteDataSource.createTodo(todo);
+  }
+
+  Future<TodoModel> _handleRemoteUpdate(TodoModel todo) async {
+    AppLogger.sync('PUSH_UPDATE', 'Updating "${todo.title}"');
+    return await remoteDataSource.updateTodo(todo);
+  }
+
+  /// Internal pull logic
   Future<void> _internalPullServerChanges() async {
     try {
       final lastSyncTime = await localDataSource.getLastSyncTime();
@@ -149,36 +189,24 @@ class SyncManager {
       final syncResponse =
           await remoteDataSource.syncTodos(since: lastSyncTime);
 
-      if (syncResponse.changes.isEmpty) {
-        AppLogger.sync('PULL', 'No remote changes since last sync');
-      } else {
+      if (syncResponse.changes.isNotEmpty) {
         AppLogger.sync(
-            'PULL', 'Received ${syncResponse.changes.length} remote changes');
-
+            'PULL', 'Applying ${syncResponse.changes.length} changes');
         for (final remoteTodo in syncResponse.changes) {
           await _processRemoteChange(remoteTodo);
         }
+      } else {
+        AppLogger.sync('PULL', 'No remote changes found');
       }
 
-      // Update sync timestamp
       await localDataSource.cacheLastSyncTime(syncResponse.timestamp);
-      AppLogger.sync(
-          'PULL_COMPLETE', 'Updated last sync time: ${syncResponse.timestamp}');
     } catch (e) {
-      AppLogger.error('Internal pull server changes failed',
-          category: 'SYNC', error: e);
+      AppLogger.error('Pull failed', category: 'SYNC', error: e);
     }
   }
 
   Future<void> _processRemoteChange(TodoModel remoteTodo) async {
-    // Conflict Resolution Strategy (Simple for now):
-    // Server wins if it has a newer or same version, unless we have very specific logic.
-    // In this app, we'll just save what comes from the server.
-
-    AppLogger.sync('MERGE',
-        'Applying remote update for "${remoteTodo.title}" (${remoteTodo.syncId})');
-
-    // Remote data is already marked isSynced=true in TodoModel.fromJson
-    await localDataSource.saveTodo(remoteTodo);
+    AppLogger.sync('MERGE', 'Remote update for "${remoteTodo.title}"');
+    await localDataSource.saveTodo(remoteTodo); // Server wins
   }
 }

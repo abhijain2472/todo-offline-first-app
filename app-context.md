@@ -13,7 +13,7 @@ This document provides a high-level overview of the application's architecture, 
 - **Local Database**: [Drift](https://drift.simonbinder.eu/) (Reactive persistence library for Flutter/Dart, SQLite-based)
 - **State Management**: [flutter_bloc](https://pub.dev/packages/flutter_bloc)
 - **Dependency Injection**: [get_it](https://pub.dev/packages/get_it)
-- **Networking**: `http` package
+- **Networking**: `http` package with a custom **`NetworkClient` abstraction** for centralized logging and error handling.
 - **Architecture**: **Clean Architecture** (Domain, Data, Presentation layers)
 
 ---
@@ -30,16 +30,19 @@ This document provides a high-level overview of the application's architecture, 
 - **Repositories Implementation**: Coordinates between Local and Remote data sources.
 - **Data Sources**:
   - `TodoLocalDataSource`: Interfaces with Drift (SQLite).
-  - `TodoRemoteDataSource`: Interfaces with the Backend API.
+  - `TodoRemoteDataSource`: Interfaces with the Backend API via `NetworkClient`.
 
 ### 3. Presentation Layer (`lib/features/todo/presentation`)
-- **BLoC**: `TodoBloc` manages the state of the Todo list and handles events.
+- **BLoC**: `TodoBloc` manages the state of the Todo list and handles events. It is decoupled from network status.
 - **Pages/Widgets**: UI components using the BLoC for data.
 
 ### 4. Core Layer (`lib/core`)
-- **Sync**: `SyncManager` handles the complex logic of Pushing local changes and Pulling remote changes.
+- **Sync**: `SyncManager` handles the high-level orchestration of Pushing and Pulling changes, including **automatic sync on connectivity recovery**.
 - **Database**: `AppDatabase` (Drift) setup and table definitions.
-- **Network**: `NetworkInfo` for connectivity checks.
+- **Network**: 
+  - `NetworkInfo`: Connectivity checks and change streams.
+  - `NetworkClient`: Abstract interface for HTTP operations.
+  - `HttpNetworkClient`: Implementation with centralized logging and status-code error checking.
 
 ---
 
@@ -49,15 +52,16 @@ The app uses a robust sync mechanism to ensure data consistency between the mobi
 
 ### Key Concepts:
 - **`syncId`**: A client-generated UUID used as the primary identifier across both local and remote databases.
-- **Soft Delete**: Todos are marked with `isDeleted = true` instead of being removed immediately, allowing the delete action to sync to the server.
+- **Soft Delete**: Todos are marked with `isDeleted = true` instead of being removed immediately.
 - **`isSynced` Flag**: Tracks whether local changes have been successfully pushed to the server.
 - **Version Tracking**: Uses a `version` field for conflict resolution (higher version wins).
+- **Auto-Sync**: The app automatically triggers a sync when moving from **Offline to Online**.
 
 ### Sync Flow (`SyncManager`):
 1. **Push**: Gathers all todos where `isSynced = false`.
-   - Sends new todos to `POST /todos`.
-   - Sends updates to `PUT /todos/:id`.
-   - Sends deletes to `DELETE /todos/:id`.
+   - Creation: `POST /todos`.
+   - Updates: `PATCH /todos/:id`.
+   - Deletes: `DELETE /todos/:id`.
 2. **Pull**:
    - Calls `GET /todos/sync?since=<last_sync_time>`.
    - Merges changes into the local Drift database.
