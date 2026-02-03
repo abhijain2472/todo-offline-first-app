@@ -50,7 +50,7 @@ class SyncOutbox extends Table {
 /// AppDatabase class
 @DriftDatabase(tables: [Todos, SyncMetadata, SyncOutbox])
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
+  AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
   int get schemaVersion => 1;

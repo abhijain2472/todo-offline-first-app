@@ -67,6 +67,7 @@ class TodoModel extends Todo {
       'version': version,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
+      'isSynced': isSynced,
     };
   }
 
