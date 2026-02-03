@@ -34,3 +34,13 @@ class ValidationFailure extends Failure {
 class SyncFailure extends Failure {
   const SyncFailure(super.message);
 }
+
+/// Failure for 404 Not Found errors
+class NotFoundFailure extends Failure {
+  const NotFoundFailure(super.message);
+}
+
+/// Failure for 409 Conflict errors (e.g., syncId already exists)
+class ConflictFailure extends Failure {
+  const ConflictFailure(super.message);
+}

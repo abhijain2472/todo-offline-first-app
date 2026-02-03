@@ -55,8 +55,13 @@ The app uses a robust sync mechanism to ensure data consistency between the mobi
 - **Soft Delete**: Todos are marked with `isDeleted = true` instead of being removed immediately.
 - **`isSynced` Flag**: A local-only flag used for UI indicators (e.g., cloud icon). *It is no longer the primary source of truth for synchronization.*
 - **Version Tracking**: Every user update increments the `version` field locally. The Outbox uses this version to distinguish between `create` (v1) and `update` (v>1) actions.
-- **Conflict Resilience**: The sync engine handles "Already Exists" and "404 Not Found" errors gracefully, treating them as successful pushes to prevent queue blockage.
+- **Typed Failure Resilience**: The sync engine handles specific failure types (`NotFoundFailure`, `ConflictFailure`) instead of generic string matching. This ensures robust and deterministic error recovery for "Already Exists" (409) and "Not Found" (404) scenarios.
 - **Auto-Sync**: The app automatically triggers a sync when moving from **Offline to Online**.
+
+### 6. Typed Failure Resilience & Versioning
+- **Typed Failure Handling**: Replaced brittle string comparisons in `SyncManager` with robust typed catch blocks (`NotFoundFailure`, `ConflictFailure`).
+- **HTTP/Protocol Awareness**: `HttpNetworkClient` now maps 404 (Not Found) and 409 (Conflict) status codes to these specific failure types, providing clear domain-specific error handling.
+- **Automatic Versioning**: The `TodoRepositoryImpl` now automatically increments the `version` field during every update, allowing the Outbox to correctly choose between `POST` and `PATCH`.
 
 ### Sync Flow (`SyncManager`):
 1. **Outbox Pattern**: Instead of scanning the `todos` table, the app maintains a **`SyncOutbox`** table (Transactional Outbox Pattern).

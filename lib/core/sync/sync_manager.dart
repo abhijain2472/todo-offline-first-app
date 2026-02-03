@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../error/failures.dart';
 import '../network/network_info.dart';
 import '../database/app_database.dart';
 import '../utils/app_logger.dart';
@@ -150,42 +151,31 @@ class SyncManager {
       if (action == SyncAction.delete) {
         try {
           await _handleRemoteDelete(todo);
+        } on NotFoundFailure {
+          AppLogger.sync('CONFLICT',
+              'Todo ${todo.syncId} already deleted on server, treating as success');
         } catch (e) {
-          if (e.toString().contains('not found') ||
-              e.toString().contains('404')) {
-            AppLogger.sync('CONFLICT',
-                'Todo ${todo.syncId} already deleted on server, treating as success');
-          } else {
-            rethrow;
-          }
+          rethrow;
         }
       } else if (action == SyncAction.create) {
         try {
           syncedTodo = await _handleRemoteCreate(todo);
+        } on ConflictFailure {
+          AppLogger.sync('CONFLICT',
+              'Todo ${todo.syncId} already exists on server, treating as success');
+          syncedTodo = todo;
         } catch (e) {
-          final errorStr = e.toString().toLowerCase();
-          if (errorStr.contains('already exists') ||
-              errorStr.contains('409') ||
-              errorStr.contains('conflict')) {
-            AppLogger.sync('CONFLICT',
-                'Todo ${todo.syncId} already exists on server, treating as success');
-            syncedTodo = todo;
-          } else {
-            rethrow;
-          }
+          rethrow;
         }
       } else {
         try {
           syncedTodo = await _handleRemoteUpdate(todo);
+        } on NotFoundFailure {
+          AppLogger.sync('CONFLICT',
+              'Todo ${todo.syncId} not found on server during update, attempting creation instead');
+          syncedTodo = await _handleRemoteCreate(todo);
         } catch (e) {
-          if (e.toString().contains('not found') ||
-              e.toString().contains('404')) {
-            AppLogger.sync('CONFLICT',
-                'Todo ${todo.syncId} not found on server during update, attempting creation instead');
-            syncedTodo = await _handleRemoteCreate(todo);
-          } else {
-            rethrow;
-          }
+          rethrow;
         }
       }
 

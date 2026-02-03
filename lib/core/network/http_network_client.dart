@@ -129,7 +129,9 @@ class HttpNetworkClient implements NetworkClient {
     } catch (e) {
       AppLogger.error('$method $endpoint - Failed',
           category: 'NETWORK', error: e);
-      if (e is ServerFailure) rethrow;
+      if (e is Failure) {
+        rethrow; // Rethrow specific failures like ServerFailure, NotFoundFailure etc
+      }
       throw ServerFailure(e.toString());
     }
   }
@@ -142,6 +144,12 @@ class HttpNetworkClient implements NetworkClient {
       message = errorData['message'] ?? 'Request failed';
     } catch (_) {
       message = 'Request failed with status: ${response.statusCode}';
+    }
+
+    if (response.statusCode == 404) {
+      throw NotFoundFailure(message);
+    } else if (response.statusCode == 409) {
+      throw ConflictFailure(message);
     }
 
     throw ServerFailure(message);
