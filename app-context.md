@@ -13,6 +13,7 @@ This document provides a high-level overview of the application's architecture, 
 - **Local Database**: [Drift](https://drift.simonbinder.eu/) (Reactive persistence library for Flutter/Dart, SQLite-based)
 - **State Management**: [flutter_bloc](https://pub.dev/packages/flutter_bloc)
 - **Dependency Injection**: [get_it](https://pub.dev/packages/get_it)
+- **Persistence**: `shared_preferences` for key-value storage (Theme settings).
 - **Networking**: `http` package with a custom **`NetworkClient` abstraction** for centralized logging and error handling.
 - **Architecture**: **Clean Architecture** (Domain, Data, Presentation layers)
 
@@ -32,9 +33,17 @@ This document provides a high-level overview of the application's architecture, 
   - `TodoLocalDataSource`: Interfaces with Drift (SQLite).
   - `TodoRemoteDataSource`: Interfaces with the Backend API via `NetworkClient`.
 
-### 3. Presentation Layer (`lib/features/todo/presentation`)
-- **BLoC**: `TodoBloc` manages the state of the Todo list and handles events. It is decoupled from network status.
-- **Pages/Widgets**: UI components using the BLoC for data.
+### 3. Presentation Layer (`lib/features/todo/presentation`, `lib/features/theme/presentation`, `lib/features/settings`)
+- **features/todo**:
+    - **BLoC**: `TodoBloc` manages the state of the Todo list and handles events.
+    - **Pages**: `TodoListScreen`, `AddEditTodoScreen`.
+- **features/theme**:
+    - **BLoC**: `ThemeBloc` manages app-wide theme state (Light/Dark/System).
+- **features/settings**:
+    - **Pages**: `SettingsPage` centralized configuration screen.
+
+### 4. Data Layer Extensions
+- **Theme**: `ThemeLocalDataSource` uses `shared_preferences` to persist user theme choice.
 
 ### 4. Core Layer (`lib/core`)
 - **Sync**: `SyncManager` handles the high-level orchestration of Pushing and Pulling changes, including **automatic sync on connectivity recovery**.

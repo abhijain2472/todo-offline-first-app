@@ -8,6 +8,7 @@ A robust, production-ready Flutter Todo application showcasing an **Offline-Firs
 - **Offline-First**: Local storage is the primary source of truth. All user actions are instant and work without internet.
 - **Smart Synchronization**: Bidirectional sync between local SQLite and remote API.
 - **Conflict Resolution**: Version-based merging to ensure data integrity.
+- **Dynamic Theming**: Dark/Light mode support with persistence.
 - **Rich UI/UX**: Modern Material 3 cards, smooth animations, and optimized keyboard handling.
 - **Debug Tools**: Built-in Drift DB Viewer to inspect local database state in real-time.
 
@@ -126,10 +127,15 @@ sequenceDiagram
 lib/
 ├── core/               # Shared logic, constants, and sync manager
 ├── features/
-│   └── todo/
-│       ├── domain/     # Entities and Use Cases
-│       ├── data/       # Models, Repositories, and Data Sources
-│       └── presentation/ # BLoC and UI Components
+│   ├── todo/           # Todo Feature (Clean Arch)
+│   │   ├── domain/     # Entities and Use Cases
+│   │   ├── data/       # Models, Repositories, and Data Sources
+│   │   └── presentation/ # BLoC and UI Components
+│   ├── theme/          # Theme Feature
+│   │   ├── data/       # Theme Persistence
+│   │   └── presentation/ # ThemeBloc
+│   └── settings/       # Settings Feature
+│       └── presentation/ # Settings UI
 └── injection_container.dart # Dependency Injection setup
 ```
 
