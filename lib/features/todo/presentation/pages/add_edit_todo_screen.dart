@@ -79,6 +79,7 @@ class _AddEditTodoScreenState extends State<AddEditTodoScreen> {
                 TextFormField(
                   controller: _titleController,
                   textInputAction: TextInputAction.next,
+                  style: Theme.of(context).textTheme.titleMedium,
                   decoration: const InputDecoration(
                     labelText: 'Title',
                     hintText: 'What needs to be done?',
@@ -95,36 +96,33 @@ class _AddEditTodoScreenState extends State<AddEditTodoScreen> {
                   },
                   autofocus: !isEditing,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
                 TextFormField(
                   controller: _descriptionController,
                   focusNode: _descriptionFocusNode,
                   textInputAction: TextInputAction.done,
+                  style: Theme.of(context).textTheme.bodyLarge,
                   decoration: const InputDecoration(
                     labelText: 'Description',
                     hintText: 'Add some details (optional)',
                     alignLabelWithHint: true,
                     prefixIcon: Icon(Icons.description),
                   ),
-                  maxLines: 3,
+                  maxLines: 5,
+                  minLines: 3,
                   onFieldSubmitted: (_) => _saveTodo(),
                 ),
                 const SizedBox(height: 32),
                 SizedBox(
                   width: double.infinity,
-                  height: 50,
-                  child: FilledButton.icon(
+                  height: 56,
+                  child: ElevatedButton.icon(
                     onPressed: _saveTodo,
                     icon: Icon(isEditing ? Icons.save : Icons.add),
                     label: Text(
                       isEditing ? 'Save Changes' : 'Create Todo',
                       style: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                    style: FilledButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
                     ),
                   ),
                 ),

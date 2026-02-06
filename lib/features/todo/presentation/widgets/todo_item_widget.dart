@@ -16,79 +16,117 @@ class TodoItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Dismissible(
       key: Key(todo.syncId),
       background: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4),
+        margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
         decoration: BoxDecoration(
-          color: Colors.redAccent,
-          borderRadius: BorderRadius.circular(12),
+          color: colorScheme.error,
+          borderRadius: BorderRadius.circular(16),
         ),
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
-        child: const Icon(Icons.delete, color: Colors.white),
+        child: Icon(Icons.delete, color: colorScheme.onError),
       ),
       direction: DismissDirection.endToStart,
       onDismissed: (direction) {
         context.read<TodoBloc>().add(DeleteTodoEvent(todo.syncId));
       },
       child: Card(
-        elevation: 2,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: todo.isCompleted
+                ? Colors.transparent
+                : colorScheme.outlineVariant.withOpacity(0.5),
+          ),
+        ),
+        color: todo.isCompleted
+            ? colorScheme.surfaceContainerHighest.withOpacity(0.5)
+            : colorScheme.surface,
         margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: ListTile(
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          leading: Transform.scale(
-            scale: 1.2,
-            child: Checkbox(
-              value: todo.isCompleted,
-              shape: const CircleBorder(),
-              onChanged: (value) {
-                context.read<TodoBloc>().add(ToggleTodoCompletionEvent(todo));
-              },
-            ),
-          ),
-          title: Text(
-            todo.title,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-              decoration: todo.isCompleted ? TextDecoration.lineThrough : null,
-              color: todo.isCompleted ? Colors.grey : Colors.black87,
-            ),
-          ),
-          subtitle: todo.description.isNotEmpty
-              ? Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    todo.description,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: todo.isCompleted ? Colors.grey : Colors.black54,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Transform.scale(
+                  scale: 1.2,
+                  child: Checkbox(
+                    value: todo.isCompleted,
+                    onChanged: (value) {
+                      context
+                          .read<TodoBloc>()
+                          .add(ToggleTodoCompletionEvent(todo));
+                    },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    activeColor: colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        todo.title,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          decoration: todo.isCompleted
+                              ? TextDecoration.lineThrough
+                              : null,
+                          color: todo.isCompleted
+                              ? theme.textTheme.bodyMedium?.color
+                              : theme.textTheme.titleMedium?.color,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (todo.description.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          todo.description,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            decoration: todo.isCompleted
+                                ? TextDecoration.lineThrough
+                                : null,
+                            color: theme.textTheme.bodyMedium?.color
+                                ?.withOpacity(0.8),
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                if (todo.isSynced)
+                  Tooltip(
+                    message: 'Synced',
+                    child: Icon(
+                      Icons.cloud_done,
+                      size: 16,
+                      color: colorScheme.secondary,
+                    ),
+                  )
+                else
+                  Tooltip(
+                    message: 'Pending Sync',
+                    child: Icon(
+                      Icons.cloud_upload,
+                      size: 16,
+                      color: colorScheme.outline,
                     ),
                   ),
-                )
-              : null,
-          trailing: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              todo.isSynced
-                  ? const Icon(Icons.cloud_done, color: Colors.green, size: 20)
-                  : const Icon(Icons.cloud_upload,
-                      color: Colors.orange, size: 20),
-              const SizedBox(height: 4),
-              Text(
-                todo.isSynced ? 'Synced' : 'Local',
-                style: TextStyle(
-                  fontSize: 10,
-                  color: todo.isSynced ? Colors.green : Colors.orange,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-          onTap: onTap,
         ),
       ),
     );

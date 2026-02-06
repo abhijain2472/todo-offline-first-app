@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import './features/todo/presentation/bloc/todo_bloc.dart';
 import './features/todo/presentation/bloc/todo_event.dart';
+import './features/theme/presentation/bloc/theme_bloc.dart';
 import './features/todo/presentation/pages/todo_list_screen.dart';
 import './injection_container.dart' as di;
+import './core/theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,22 +23,21 @@ class MyApp extends StatelessWidget {
         BlocProvider(
           create: (_) => di.sl<TodoBloc>()..add(LoadTodosEvent()),
         ),
-      ],
-      child: MaterialApp(
-        title: 'Offline-First Todo App',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.blue,
-            brightness: Brightness.light,
-          ),
-          useMaterial3: true,
-          inputDecorationTheme: const InputDecorationTheme(
-            border: OutlineInputBorder(),
-            filled: true,
-          ),
+        BlocProvider(
+          create: (_) => di.sl<ThemeBloc>()..add(LoadThemeEvent()),
         ),
-        home: const TodoListScreen(),
+      ],
+      child: BlocBuilder<ThemeBloc, ThemeState>(
+        builder: (context, state) {
+          return MaterialApp(
+            title: 'Offline-First Todo App',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: state.themeMode,
+            home: const TodoListScreen(),
+          );
+        },
       ),
     );
   }

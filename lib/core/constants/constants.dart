@@ -1,7 +1,7 @@
 /// API Constants
 class ApiConstants {
   // Base URL for the API
-  static const String baseUrl = 'http://192.168.1.6:3000/api';
+  static const String baseUrl = 'https://todo-api-ov0j.onrender.com/api';
 
   // Headers
   static const Map<String, String> headers = {

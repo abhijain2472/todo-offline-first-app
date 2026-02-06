@@ -1,0 +1,51 @@
+import 'package:flutter/material.dart';
+import '../pages/add_edit_todo_screen.dart';
+
+class EmptyTodoView extends StatelessWidget {
+  const EmptyTodoView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.checklist_rtl_rounded,
+            size: 100,
+            color: theme.colorScheme.primary.withOpacity(0.2),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'No todos yet',
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: theme.colorScheme.onSurface.withOpacity(0.6),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Add a task to get started',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface.withOpacity(0.4),
+            ),
+          ),
+          const SizedBox(height: 32),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const AddEditTodoScreen(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.add_rounded),
+            label: const Text('Add First Todo'),
+          ),
+        ],
+      ),
+    );
+  }
+}
