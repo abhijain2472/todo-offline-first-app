@@ -60,9 +60,10 @@ This document provides a high-level overview of the application's architecture, 
   - `AppLocalization`: Localization setup with i69n package.
   - `translations.i69n.yaml`: Source file containing all translatable strings (English).
   - `translations_hi.i69n.yaml`: Hindi translation file.
-  - `translations.i69n.dart` & `translations_hi.i69n.dart`: Generated type-safe translation classes.
+  - `translations_gu.i69n.yaml`: Gujarati translation file.
+  - `translations.i69n.dart`, `translations_hi.i69n.dart` & `translations_gu.i69n.dart`: Generated type-safe translation classes.
   - All UI strings are accessed via `context.translations` extension method.
-  - Supported locales: English (en), Hindi (hi).
+  - Supported locales: English (en), Hindi (hi), Gujarati (gu).
   - **Dynamic Language Switching**: Users can change app language from Settings page, persisted via SharedPreferences.
   - **To add/modify translations**: 
     1. Edit `lib/core/localization/translation/translations.i69n.yaml`
@@ -76,7 +77,7 @@ This document provides a high-level overview of the application's architecture, 
 The app uses the **i69n** package for type-safe internationalization with **dynamic language switching**.
 
 ### Features:
-- **Supported Languages**: English (en), Hindi (hi)
+- **Supported Languages**: English (en), Hindi (hi), Gujarati (gu)
 - **Dynamic Switching**: Users can change language from Settings → Language dropdown
 - **Persistence**: Selected language is saved to SharedPreferences and persists across app restarts
 - **Real-time Updates**: App immediately updates all text when language is changed

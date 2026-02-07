@@ -1,13 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:todo_offline_first_app/core/localization/translation/translations.i69n.dart';
 import 'package:todo_offline_first_app/core/localization/translation/translations_hi.i69n.dart';
+import 'package:todo_offline_first_app/core/localization/translation/translations_gu.i69n.dart';
 
 export 'translation/translations.i69n.dart';
 
 final _translations = <String, Translations Function()>{
   'en': () => const Translations(),
   'hi': () => const Translations_hi(),
+  'gu': () => const Translations_gu(),
 };
+
+/// Extension to get language name from translations for each locale code
+extension LocaleHelpers on BuildContext {
+  String getLanguageDisplayName(String localeCode) {
+    final translations = this.translations;
+    switch (localeCode) {
+      case 'en':
+        return translations.settings.languageEnglish;
+      case 'hi':
+        return translations.settings.languageHindi;
+      case 'gu':
+        return translations.settings.languageGujarati;
+      default:
+        return localeCode.toUpperCase();
+    }
+  }
+}
 
 class AppLocalization {
   final Translations translations;

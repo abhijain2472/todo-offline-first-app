@@ -3,8 +3,8 @@
 import 'package:i69n/i69n.dart' as i69n;
 import 'translations.i69n.dart';
 
-String get _languageCode => 'hi';
-String get _localeName => 'hi';
+String get _languageCode => 'gu';
+String get _localeName => 'gu';
 
 String _plural(int count,
         {String? zero,
@@ -34,15 +34,15 @@ String _cardinal(int count,
     i69n.cardinal(count, _languageCode,
         zero: zero, one: one, two: two, few: few, many: many, other: other);
 
-class Translations_hi extends Translations {
-  const Translations_hi();
-  String get appTitle => "ऑफ़लाइन-फर्स्ट टूडू ऐप";
-  CommonTranslations_hi get common => CommonTranslations_hi(this);
-  HomeTranslations_hi get home => HomeTranslations_hi(this);
-  TodoTranslations_hi get todo => TodoTranslations_hi(this);
-  SettingsTranslations_hi get settings => SettingsTranslations_hi(this);
-  AccessibilityTranslations_hi get accessibility =>
-      AccessibilityTranslations_hi(this);
+class Translations_gu extends Translations {
+  const Translations_gu();
+  String get appTitle => "ઑફલાઇન-ફર્સ્ટ ટૂડૂ એપ";
+  CommonTranslations_gu get common => CommonTranslations_gu(this);
+  HomeTranslations_gu get home => HomeTranslations_gu(this);
+  TodoTranslations_gu get todo => TodoTranslations_gu(this);
+  SettingsTranslations_gu get settings => SettingsTranslations_gu(this);
+  AccessibilityTranslations_gu get accessibility =>
+      AccessibilityTranslations_gu(this);
   Object operator [](String key) {
     var index = key.indexOf('.');
     if (index > 0) {
@@ -68,14 +68,14 @@ class Translations_hi extends Translations {
   }
 }
 
-class CommonTranslations_hi extends CommonTranslations {
-  final Translations_hi _parent;
-  const CommonTranslations_hi(this._parent) : super(_parent);
-  String get cancel => "रद्द करें";
-  String get retry => "पुनः प्रयास करें";
-  String get error => "त्रुटि";
-  String get save => "सहेजें";
-  String get delete => "हटाएं";
+class CommonTranslations_gu extends CommonTranslations {
+  final Translations_gu _parent;
+  const CommonTranslations_gu(this._parent) : super(_parent);
+  String get cancel => "રદ કરો";
+  String get retry => "ફરી પ્રયાસ કરો";
+  String get error => "ભૂલ";
+  String get save => "સાચવો";
+  String get delete => "કાઢી નાખો";
   Object operator [](String key) {
     var index = key.indexOf('.');
     if (index > 0) {
@@ -99,19 +99,19 @@ class CommonTranslations_hi extends CommonTranslations {
   }
 }
 
-class HomeTranslations_hi extends HomeTranslations {
-  final Translations_hi _parent;
-  const HomeTranslations_hi(this._parent) : super(_parent);
-  String get searchPlaceholder => "टूडू खोजें...";
-  String get filterAll => "सभी";
-  String get filterActive => "सक्रिय";
-  String get filterCompleted => "पूर्ण";
-  String get noTodos => "अभी तक कोई टूडू नहीं";
-  String get addFirstTodo => "शुरू करने के लिए एक कार्य जोड़ें";
-  String get addFirstTodoButton => "पहला टूडू जोड़ें";
-  String get errorLoading => "टूडू लोड करने में त्रुटि";
-  String get errorTitle => "उफ़!";
-  String get tryAgain => "पुनः प्रयास करें";
+class HomeTranslations_gu extends HomeTranslations {
+  final Translations_gu _parent;
+  const HomeTranslations_gu(this._parent) : super(_parent);
+  String get searchPlaceholder => "ટૂડૂ શોધો...";
+  String get filterAll => "બધા";
+  String get filterActive => "સક્રિય";
+  String get filterCompleted => "પૂર્ણ";
+  String get noTodos => "હજુ સુધી કોઈ ટૂડૂ નથી";
+  String get addFirstTodo => "શરૂ કરવા માટે એક કાર્ય ઉમેરો";
+  String get addFirstTodoButton => "પ્રથમ ટૂડૂ ઉમેરો";
+  String get errorLoading => "ટૂડૂ લોડ કરવામાં ભૂલ";
+  String get errorTitle => "અરે!";
+  String get tryAgain => "ફરી પ્રયાસ કરો";
   Object operator [](String key) {
     var index = key.indexOf('.');
     if (index > 0) {
@@ -145,21 +145,21 @@ class HomeTranslations_hi extends HomeTranslations {
   }
 }
 
-class TodoTranslations_hi extends TodoTranslations {
-  final Translations_hi _parent;
-  const TodoTranslations_hi(this._parent) : super(_parent);
-  String get addTitle => "टूडू जोड़ें";
-  String get editTitle => "टूडू संपादित करें";
-  String get titleLabel => "शीर्षक";
-  String get titleHint => "क्या करना है?";
-  String get titleRequired => "शीर्षक आवश्यक है";
-  String get descriptionLabel => "विवरण";
-  String get descriptionHint => "कुछ विवरण जोड़ें (वैकल्पिक)";
-  String get saveButton => "टूडू सहेजें";
-  String get saveChanges => "परिवर्तन सहेजें";
-  String get createTodo => "टूडू बनाएं";
-  String get synced => "समन्वयित";
-  String get pendingSync => "समन्वयन लंबित";
+class TodoTranslations_gu extends TodoTranslations {
+  final Translations_gu _parent;
+  const TodoTranslations_gu(this._parent) : super(_parent);
+  String get addTitle => "ટૂડૂ ઉમેરો";
+  String get editTitle => "ટૂડૂ સંપાદિત કરો";
+  String get titleLabel => "શીર્ષક";
+  String get titleHint => "શું કરવાનું છે?";
+  String get titleRequired => "શીર્ષક જરૂરી છે";
+  String get descriptionLabel => "વર્ણન";
+  String get descriptionHint => "કેટલીક વિગતો ઉમેરો (વૈકલ્પિક)";
+  String get saveButton => "ટૂડૂ સાચવો";
+  String get saveChanges => "ફેરફારો સાચવો";
+  String get createTodo => "ટૂડૂ બનાવો";
+  String get synced => "સમન્વયિત";
+  String get pendingSync => "સમન્વયન બાકી";
   Object operator [](String key) {
     var index = key.indexOf('.');
     if (index > 0) {
@@ -197,30 +197,30 @@ class TodoTranslations_hi extends TodoTranslations {
   }
 }
 
-class SettingsTranslations_hi extends SettingsTranslations {
-  final Translations_hi _parent;
-  const SettingsTranslations_hi(this._parent) : super(_parent);
-  String get title => "सेटिंग्स";
-  String get darkMode => "डार्क मोड";
-  String get language => "भाषा";
-  String get languageSubtitle => "अपनी पसंदीदा भाषा चुनें";
-  String get dataManagement => "डेटा प्रबंधन";
-  String get syncNow => "अभी समन्वयित करें";
-  String get syncNowSubtitle => "रिमोट सर्वर के साथ जबरन समन्वयन करें";
-  String get clearData => "स्थानीय डेटा साफ़ करें";
-  String get clearDataSubtitle => "स्थानीय डेटाबेस से सभी टूडू हटाएं";
-  String get developer => "डेवलपर विकल्प";
-  String get viewDatabase => "डेटाबेस देखें";
-  String get viewDatabaseSubtitle => "स्थानीय ड्रिफ्ट डेटाबेस का निरीक्षण करें";
-  String get clearDialogTitle => "स्थानीय डेटा साफ़ करें?";
+class SettingsTranslations_gu extends SettingsTranslations {
+  final Translations_gu _parent;
+  const SettingsTranslations_gu(this._parent) : super(_parent);
+  String get title => "સેટિંગ્સ";
+  String get darkMode => "ડાર્ક મોડ";
+  String get language => "ભાષા";
+  String get languageSubtitle => "તમારી પસંદીદા ભાષા પસંદ કરો";
+  String get dataManagement => "ડેટા વ્યવસ્થાપન";
+  String get syncNow => "હવે સમન્વયિત કરો";
+  String get syncNowSubtitle => "રિમોટ સર્વર સાથે ફરજિયાત સમન્વયન કરો";
+  String get clearData => "સ્થાનિક ડેટા સાફ કરો";
+  String get clearDataSubtitle => "સ્થાનિક ડેટાબેઝમાંથી તમામ ટૂડૂ કાઢી નાખો";
+  String get developer => "ડેવલપર વિકલ્પો";
+  String get viewDatabase => "ડેટાબેઝ જુઓ";
+  String get viewDatabaseSubtitle => "સ્થાનિક ડ્રિફ્ટ ડેટાબેઝનું નિરીક્ષણ કરો";
+  String get clearDialogTitle => "સ્થાનિક ડેટા સાફ કરો?";
   String get clearDialogContent =>
-      "यह आपके स्थानीय डेटाबेस से सभी टूडू हटा देगा। यह खाली स्थिति से समन्वयन परीक्षण के लिए है।";
-  String get clearDialogConfirm => "साफ़ करें";
-  String get dataCleared => "स्थानीय डेटा साफ़ किया गया";
-  String get syncStarted => "समन्वयन शुरू हो गया...";
-  String get languageEnglish => "English (अंग्रेज़ी)";
-  String get languageHindi => "हिन्दी";
-  String get languageGujarati => "ગુજરાતી (गुजराती)";
+      "આ તમારા સ્થાનિક ડેટાબેઝમાંથી તમામ ટૂડૂ કાઢી નાખશે. આ ખાલી સ્થિતિમાંથી સમન્વયન પરીક્ષણ માટે છે.";
+  String get clearDialogConfirm => "સાફ કરો";
+  String get dataCleared => "સ્થાનિક ડેટા સાફ કરાયો";
+  String get syncStarted => "સમન્વયન શરૂ થયું...";
+  String get languageEnglish => "English (અંગ્રેજી)";
+  String get languageHindi => "हिन्दी (હિન્દી)";
+  String get languageGujarati => "ગુજરાતી";
   Object operator [](String key) {
     var index = key.indexOf('.');
     if (index > 0) {
@@ -274,11 +274,11 @@ class SettingsTranslations_hi extends SettingsTranslations {
   }
 }
 
-class AccessibilityTranslations_hi extends AccessibilityTranslations {
-  final Translations_hi _parent;
-  const AccessibilityTranslations_hi(this._parent) : super(_parent);
-  String get switchToLight => "लाइट मोड पर स्विच करें";
-  String get switchToDark => "डार्क मोड पर स्विच करें";
+class AccessibilityTranslations_gu extends AccessibilityTranslations {
+  final Translations_gu _parent;
+  const AccessibilityTranslations_gu(this._parent) : super(_parent);
+  String get switchToLight => "લાઇટ મોડ પર સ્વિચ કરો";
+  String get switchToDark => "ડાર્ક મોડ પર સ્વિચ કરો";
   Object operator [](String key) {
     var index = key.indexOf('.');
     if (index > 0) {

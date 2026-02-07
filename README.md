@@ -166,6 +166,7 @@ The app supports **dynamic language switching** with full persistence:
 ### Supported Languages:
 - 🇬🇧 **English** (en)
 - 🇮🇳 **Hindi** (hi) - हिन्दी
+- 🇮🇳 **Gujarati** (gu) - ગુજરાતી
 
 ### Features:
 - **Dynamic Switching**: Change language in Settings → Language dropdown

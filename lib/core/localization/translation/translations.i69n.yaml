@@ -52,6 +52,7 @@ settings:
   syncStarted: "Sync started..."
   languageEnglish: "English"
   languageHindi: "हिन्दी (Hindi)"
+  languageGujarati: "ગુજરાતી (Gujarati)"
   
 accessibility:
   switchToLight: "Switch to Light Mode"

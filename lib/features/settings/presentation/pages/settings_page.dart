@@ -72,16 +72,13 @@ class _LanguageSection extends StatelessWidget {
           trailing: DropdownButton<Locale>(
             value: state.locale,
             underline: const SizedBox(),
-            items: [
-              DropdownMenuItem(
-                value: const Locale('en'),
-                child: Text(context.translations.settings.languageEnglish),
-              ),
-              DropdownMenuItem(
-                value: const Locale('hi'),
-                child: Text(context.translations.settings.languageHindi),
-              ),
-            ],
+            items: AppLocalization.supportedLocals.map((locale) {
+              return DropdownMenuItem(
+                value: locale,
+                child:
+                    Text(context.getLanguageDisplayName(locale.languageCode)),
+              );
+            }).toList(),
             onChanged: (Locale? newLocale) {
               if (newLocale != null) {
                 context.read<LocaleBloc>().add(ChangeLocaleEvent(newLocale));

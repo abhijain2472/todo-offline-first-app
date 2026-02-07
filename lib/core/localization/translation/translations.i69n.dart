@@ -219,6 +219,7 @@ class SettingsTranslations implements i69n.I69nMessageBundle {
   String get syncStarted => "Sync started...";
   String get languageEnglish => "English";
   String get languageHindi => "हिन्दी (Hindi)";
+  String get languageGujarati => "ગુજરાતી (Gujarati)";
   Object operator [](String key) {
     var index = key.indexOf('.');
     if (index > 0) {
@@ -264,6 +265,8 @@ class SettingsTranslations implements i69n.I69nMessageBundle {
         return languageEnglish;
       case 'languageHindi':
         return languageHindi;
+      case 'languageGujarati':
+        return languageGujarati;
       default:
         return key;
     }

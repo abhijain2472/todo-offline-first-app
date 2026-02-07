@@ -52,6 +52,7 @@ settings:
   syncStarted: "समन्वयन शुरू हो गया..."
   languageEnglish: "English (अंग्रेज़ी)"
   languageHindi: "हिन्दी"
+  languageGujarati: "ગુજરાતી (गुजराती)"
   
 accessibility:
   switchToLight: "लाइट मोड पर स्विच करें"
