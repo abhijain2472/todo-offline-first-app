@@ -43,11 +43,11 @@ class TodoItemWidget extends StatelessWidget {
           side: BorderSide(
             color: todo.isCompleted
                 ? Colors.transparent
-                : colorScheme.outlineVariant.withOpacity(0.5),
+                : colorScheme.outlineVariant.withValues(alpha: 0.5),
           ),
         ),
         color: todo.isCompleted
-            ? colorScheme.surfaceContainerHighest.withOpacity(0.5)
+            ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
             : colorScheme.surface,
         margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
         child: InkWell(
@@ -98,7 +98,7 @@ class TodoItemWidget extends StatelessWidget {
                                 ? TextDecoration.lineThrough
                                 : null,
                             color: theme.textTheme.bodyMedium?.color
-                                ?.withOpacity(0.8),
+                                ?.withValues(alpha: 0.8),
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,

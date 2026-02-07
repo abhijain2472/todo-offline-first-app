@@ -119,15 +119,27 @@ class _AddEditTodoScreenState extends State<AddEditTodoScreen> {
                 SizedBox(
                   width: double.infinity,
                   height: 56,
-                  child: ElevatedButton.icon(
+                  child: ElevatedButton(
                     onPressed: _saveTodo,
-                    icon: Icon(isEditing ? Icons.save : Icons.add),
-                    label: Text(
-                      isEditing
-                          ? context.translations.todo.saveChanges
-                          : context.translations.todo.createTodo,
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          isEditing ? Icons.save : Icons.add,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          isEditing
+                              ? context.translations.todo.saveChanges
+                              : context.translations.todo.createTodo,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),

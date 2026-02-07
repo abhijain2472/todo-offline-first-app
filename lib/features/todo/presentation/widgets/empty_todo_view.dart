@@ -15,13 +15,13 @@ class EmptyTodoView extends StatelessWidget {
           Icon(
             Icons.checklist_rtl_rounded,
             size: 100,
-            color: theme.colorScheme.primary.withOpacity(0.2),
+            color: theme.colorScheme.primary.withValues(alpha: 0.2),
           ),
           const SizedBox(height: 24),
           Text(
             context.translations.home.noTodos,
             style: theme.textTheme.headlineSmall?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.6),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -29,11 +29,11 @@ class EmptyTodoView extends StatelessWidget {
           Text(
             context.translations.home.addFirstTodo,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.4),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
             ),
           ),
           const SizedBox(height: 32),
-          ElevatedButton.icon(
+          ElevatedButton(
             onPressed: () {
               Navigator.push(
                 context,
@@ -42,8 +42,22 @@ class EmptyTodoView extends StatelessWidget {
                 ),
               );
             },
-            icon: const Icon(Icons.add_rounded),
-            label: Text(context.translations.home.addFirstTodoButton),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.add_rounded,
+                  color: theme.colorScheme.onPrimary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  context.translations.home.addFirstTodoButton,
+                  style: TextStyle(
+                    color: theme.colorScheme.onPrimary,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

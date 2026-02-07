@@ -23,7 +23,7 @@ class ErrorTodoView extends StatelessWidget {
             Icon(
               Icons.error_outline_rounded,
               size: 80,
-              color: theme.colorScheme.error.withOpacity(0.5),
+              color: theme.colorScheme.error.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 24),
             Text(
@@ -37,7 +37,7 @@ class ErrorTodoView extends StatelessWidget {
             Text(
               message,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
               ),
               textAlign: TextAlign.center,
             ),
