@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/localization/app_localization.dart';
 import '../bloc/todo_bloc.dart';
 import '../bloc/todo_event.dart';
 import '../bloc/todo_state.dart';
@@ -40,7 +41,7 @@ class TodoListScreen extends StatelessWidget {
               },
             );
           }
-          return const Center(child: Text('Start by adding a todo'));
+          return Center(child: Text(context.translations.home.addFirstTodo));
         },
       ),
       floatingActionButton: FloatingActionButton(

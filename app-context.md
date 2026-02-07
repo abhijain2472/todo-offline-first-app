@@ -13,8 +13,9 @@ This document provides a high-level overview of the application's architecture, 
 - **Local Database**: [Drift](https://drift.simonbinder.eu/) (Reactive persistence library for Flutter/Dart, SQLite-based)
 - **State Management**: [flutter_bloc](https://pub.dev/packages/flutter_bloc)
 - **Dependency Injection**: [get_it](https://pub.dev/packages/get_it)
-- **Persistence**: `shared_preferences` for key-value storage (Theme settings).
-- **Networking**: `http` package with a custom **`NetworkClient` abstraction** for centralized logging and error handling.
+- **Persistence**: `shared_preferences` for key-value storage (Theme settings)
+- **Networking**: `http` package with a custom **`NetworkClient` abstraction** for centralized logging and error handling
+- **Localization**: [i69n](https://pub.dev/packages/i69n) for internationalization with generated type-safe translations
 - **Architecture**: **Clean Architecture** (Domain, Data, Presentation layers)
 
 ---
@@ -42,9 +43,6 @@ This document provides a high-level overview of the application's architecture, 
 - **features/settings**:
     - **Pages**: `SettingsPage` centralized configuration screen.
 
-### 4. Data Layer Extensions
-- **Theme**: `ThemeLocalDataSource` uses `shared_preferences` to persist user theme choice.
-
 ### 4. Core Layer (`lib/core`)
 - **Sync**: `SyncManager` handles the high-level orchestration of Pushing and Pulling changes, including **automatic sync on connectivity recovery**.
 - **Database**: `AppDatabase` (Drift) setup and table definitions.
@@ -52,6 +50,59 @@ This document provides a high-level overview of the application's architecture, 
   - `NetworkInfo`: Connectivity checks and change streams.
   - `NetworkClient`: Abstract interface for HTTP operations.
   - `HttpNetworkClient`: Implementation with centralized logging and status-code error checking.
+- **Localization**: 
+  - `AppLocalization`: Localization setup with i69n package.
+  - `translations.i69n.yaml`: Source file containing all translatable strings.
+  - `translations.i69n.dart`: Generated type-safe translation classes.
+  - All UI strings are accessed via `context.translations` extension method.
+  - Supported locales: English (en) - more can be added by creating additional `.yaml` files.
+  - **To add/modify translations**: 
+    1. Edit `lib/core/localization/translation/translations.i69n.yaml`
+    2. Run `flutter pub run build_runner build --delete-conflicting-outputs` to regenerate the `.dart` file
+    3. Access translations in code using `context.translations.<category>.<key>`
+
+---
+
+## 🌐 Localization
+
+The app uses the **i69n** package for type-safe internationalization.
+
+### Structure:
+- **Source File**: `lib/core/localization/translation/translations.i69n.yaml`
+- **Generated File**: `lib/core/localization/translation/translations.i69n.dart` (auto-generated, do not edit)
+- **Extension**: `context.translations` provides easy access to translations in any Widget
+
+### Translation Categories:
+- `appTitle`: Application title
+- `common`: Shared strings (cancel, retry, error, save, delete)
+- `home`: Home screen strings (search, filters, empty states, errors)
+- `todo`: Todo-specific strings (add/edit titles, labels, hints, validation, sync status)
+- `settings`: Settings page strings (titles, options, dialogs)
+- `accessibility`: Accessibility labels
+
+### Usage Example:
+```dart
+// In any Widget with BuildContext:
+Text(context.translations.todo.titleLabel)
+Text(context.translations.home.noTodos)
+Text(context.translations.settings.syncNow)
+```
+
+### Adding New Strings:
+1. Open `lib/core/localization/translation/translations.i69n.yaml`
+2. Add your new key under the appropriate category:
+   ```yaml
+   todo:
+     myNewKey: "My New Translation"
+   ```
+3. Run: `flutter pub run build_runner build --delete-conflicting-outputs`
+4. Use in code: `context.translations.todo.myNewKey`
+
+### Adding New Languages:
+1. Create a new file: `translations_<locale>.i69n.yaml` (e.g., `translations_es.i69n.yaml` for Spanish)
+2. Copy the structure from `translations.i69n.yaml` and translate the values
+3. Update `lib/core/localization/app_localization.dart` to register the new locale
+4. Run build_runner to generate the new translation classes
 
 ---
 

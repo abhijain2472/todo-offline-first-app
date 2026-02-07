@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/localization/app_localization.dart';
 import '../../../settings/presentation/pages/settings_page.dart';
 
 class TodoListAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -10,7 +11,7 @@ class TodoListAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: const Text('Todo App'),
+      title: Text(context.translations.appTitle),
       actions: [
         IconButton(
           icon: const Icon(Icons.settings),

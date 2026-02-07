@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/localization/app_localization.dart';
 import '../../domain/entities/todo.dart';
 import '../bloc/todo_bloc.dart';
 import '../bloc/todo_event.dart';
@@ -108,7 +109,7 @@ class TodoItemWidget extends StatelessWidget {
                 ),
                 if (todo.isSynced)
                   Tooltip(
-                    message: 'Synced',
+                    message: context.translations.todo.synced,
                     child: Icon(
                       Icons.cloud_done,
                       size: 16,
@@ -117,7 +118,7 @@ class TodoItemWidget extends StatelessWidget {
                   )
                 else
                   Tooltip(
-                    message: 'Pending Sync',
+                    message: context.translations.todo.pendingSync,
                     child: Icon(
                       Icons.cloud_upload,
                       size: 16,

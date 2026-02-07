@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/localization/app_localization.dart';
 import '../../domain/entities/todo.dart';
 import '../bloc/todo_bloc.dart';
 import '../bloc/todo_event.dart';
@@ -68,7 +69,9 @@ class _AddEditTodoScreenState extends State<AddEditTodoScreen> {
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         appBar: AppBar(
-          title: Text(isEditing ? 'Edit Todo' : 'Add Todo'),
+          title: Text(isEditing
+              ? context.translations.todo.editTitle
+              : context.translations.todo.addTitle),
         ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
@@ -80,14 +83,14 @@ class _AddEditTodoScreenState extends State<AddEditTodoScreen> {
                   controller: _titleController,
                   textInputAction: TextInputAction.next,
                   style: Theme.of(context).textTheme.titleMedium,
-                  decoration: const InputDecoration(
-                    labelText: 'Title',
-                    hintText: 'What needs to be done?',
-                    prefixIcon: Icon(Icons.title),
+                  decoration: InputDecoration(
+                    labelText: context.translations.todo.titleLabel,
+                    hintText: context.translations.todo.titleHint,
+                    prefixIcon: const Icon(Icons.title),
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Title is required';
+                      return context.translations.todo.titleRequired;
                     }
                     return null;
                   },
@@ -102,11 +105,11 @@ class _AddEditTodoScreenState extends State<AddEditTodoScreen> {
                   focusNode: _descriptionFocusNode,
                   textInputAction: TextInputAction.done,
                   style: Theme.of(context).textTheme.bodyLarge,
-                  decoration: const InputDecoration(
-                    labelText: 'Description',
-                    hintText: 'Add some details (optional)',
+                  decoration: InputDecoration(
+                    labelText: context.translations.todo.descriptionLabel,
+                    hintText: context.translations.todo.descriptionHint,
                     alignLabelWithHint: true,
-                    prefixIcon: Icon(Icons.description),
+                    prefixIcon: const Icon(Icons.description),
                   ),
                   maxLines: 5,
                   minLines: 3,
@@ -120,7 +123,9 @@ class _AddEditTodoScreenState extends State<AddEditTodoScreen> {
                     onPressed: _saveTodo,
                     icon: Icon(isEditing ? Icons.save : Icons.add),
                     label: Text(
-                      isEditing ? 'Save Changes' : 'Create Todo',
+                      isEditing
+                          ? context.translations.todo.saveChanges
+                          : context.translations.todo.createTodo,
                       style: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.bold),
                     ),

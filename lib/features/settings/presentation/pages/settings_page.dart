@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:drift_db_viewer/drift_db_viewer.dart';
 import '../../../../injection_container.dart';
 import '../../../../core/database/app_database.dart';
+import '../../../../core/localization/app_localization.dart';
 import '../../../theme/presentation/bloc/theme_bloc.dart';
 import '../../../todo/presentation/bloc/todo_bloc.dart';
 import '../../../todo/presentation/bloc/todo_event.dart';
@@ -14,7 +15,7 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(context.translations.settings.title),
       ),
       body: ListView(
         children: const [
@@ -39,7 +40,7 @@ class _ThemeSection extends StatelessWidget {
         final isDark = state.themeMode == ThemeMode.dark;
         return ListTile(
           leading: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-          title: const Text('Dark Mode'),
+          title: Text(context.translations.settings.darkMode),
           trailing: Switch(
             value: isDark,
             onChanged: (value) {
@@ -60,11 +61,11 @@ class _DataSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.all(16.0),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
           child: Text(
-            'Data Management',
-            style: TextStyle(
+            context.translations.settings.dataManagement,
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
               color: Colors.grey,
@@ -73,20 +74,21 @@ class _DataSection extends StatelessWidget {
         ),
         ListTile(
           leading: const Icon(Icons.sync),
-          title: const Text('Sync Now'),
-          subtitle: const Text('Force sync with remote server'),
+          title: Text(context.translations.settings.syncNow),
+          subtitle: Text(context.translations.settings.syncNowSubtitle),
           onTap: () {
             context.read<TodoBloc>().add(SyncTodosEvent());
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Sync started...')),
+              SnackBar(
+                  content: Text(context.translations.settings.syncStarted)),
             );
           },
         ),
         ListTile(
           leading: const Icon(Icons.delete_forever, color: Colors.red),
-          title: const Text('Clear Local Data',
-              style: TextStyle(color: Colors.red)),
-          subtitle: const Text('Delete all todos from local database'),
+          title: Text(context.translations.settings.clearData,
+              style: const TextStyle(color: Colors.red)),
+          subtitle: Text(context.translations.settings.clearDataSubtitle),
           onTap: () => _showClearDataDialog(context),
         ),
       ],
@@ -97,23 +99,24 @@ class _DataSection extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Clear Local Data?'),
-        content: const Text(
-            'This will delete all todos from your local database. It is for testing sync from empty state.'),
+        title: Text(context.translations.settings.clearDialogTitle),
+        content: Text(context.translations.settings.clearDialogContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(context.translations.common.cancel),
           ),
           TextButton(
             onPressed: () {
               context.read<TodoBloc>().add(ClearLocalDataEvent());
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Local data cleared')),
+                SnackBar(
+                    content: Text(context.translations.settings.dataCleared)),
               );
             },
-            child: const Text('Clear', style: TextStyle(color: Colors.red)),
+            child: Text(context.translations.settings.clearDialogConfirm,
+                style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -129,11 +132,11 @@ class _DeveloperSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.all(16.0),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
           child: Text(
-            'Developer Options',
-            style: TextStyle(
+            context.translations.settings.developer,
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
               color: Colors.grey,
@@ -142,8 +145,8 @@ class _DeveloperSection extends StatelessWidget {
         ),
         ListTile(
           leading: const Icon(Icons.storage),
-          title: const Text('View Database'),
-          subtitle: const Text('Inspect local Drift database'),
+          title: Text(context.translations.settings.viewDatabase),
+          subtitle: Text(context.translations.settings.viewDatabaseSubtitle),
           onTap: () {
             final db = sl<AppDatabase>();
             Navigator.of(context).push(

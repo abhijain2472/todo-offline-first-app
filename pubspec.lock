@@ -363,6 +363,11 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.0.0"
+  flutter_localizations:
+    dependency: "direct main"
+    description: flutter
+    source: sdk
+    version: "0.0.0"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -429,6 +434,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.2"
+  i69n:
+    dependency: "direct main"
+    description:
+      name: i69n
+      sha256: d780cb37a41270084a6ca58af272ad319af6957cb1dfa668e0bc5a4e1de18476
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.4.0"
   intl:
     dependency: "direct main"
     description:

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/localization/app_localization.dart';
 
 class ErrorTodoView extends StatelessWidget {
   final String message;
@@ -26,7 +27,7 @@ class ErrorTodoView extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              'Oops!',
+              context.translations.home.errorTitle,
               style: theme.textTheme.headlineSmall?.copyWith(
                 color: theme.colorScheme.error,
                 fontWeight: FontWeight.bold,
@@ -44,7 +45,7 @@ class ErrorTodoView extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Try Again'),
+              label: Text(context.translations.home.tryAgain),
               style: ElevatedButton.styleFrom(
                 backgroundColor: theme.colorScheme.errorContainer,
                 foregroundColor: theme.colorScheme.onErrorContainer,

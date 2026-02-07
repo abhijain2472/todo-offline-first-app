@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/localization/app_localization.dart';
 import '../pages/add_edit_todo_screen.dart';
 
 class EmptyTodoView extends StatelessWidget {
@@ -18,7 +19,7 @@ class EmptyTodoView extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            'No todos yet',
+            context.translations.home.noTodos,
             style: theme.textTheme.headlineSmall?.copyWith(
               color: theme.colorScheme.onSurface.withOpacity(0.6),
               fontWeight: FontWeight.bold,
@@ -26,7 +27,7 @@ class EmptyTodoView extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Add a task to get started',
+            context.translations.home.addFirstTodo,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurface.withOpacity(0.4),
             ),
@@ -42,7 +43,7 @@ class EmptyTodoView extends StatelessWidget {
               );
             },
             icon: const Icon(Icons.add_rounded),
-            label: const Text('Add First Todo'),
+            label: Text(context.translations.home.addFirstTodoButton),
           ),
         ],
       ),
