@@ -32,6 +32,11 @@ import 'features/theme/data/repositories/theme_repository_impl.dart';
 import 'features/theme/domain/repositories/theme_repository.dart';
 import 'features/theme/presentation/bloc/theme_bloc.dart';
 
+import 'features/locale/data/datasources/locale_local_data_source.dart';
+import 'features/locale/data/repositories/locale_repository_impl.dart';
+import 'features/locale/domain/repositories/locale_repository.dart';
+import 'features/locale/presentation/bloc/locale_bloc.dart';
+
 final sl = GetIt.instance;
 
 Future<void> init() async {
@@ -49,6 +54,22 @@ Future<void> init() async {
   // Data sources
   sl.registerLazySingleton<ThemeLocalDataSource>(
     () => ThemeLocalDataSourceImpl(sharedPreferences: sl()),
+  );
+
+  //! Features - Locale
+  // Bloc
+  sl.registerFactory(
+    () => LocaleBloc(localeRepository: sl()),
+  );
+
+  // Repository
+  sl.registerLazySingleton<LocaleRepository>(
+    () => LocaleRepositoryImpl(localDataSource: sl()),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<LocaleLocalDataSource>(
+    () => LocaleLocalDataSourceImpl(sharedPreferences: sl()),
   );
 
   //! Features - Todo

@@ -9,6 +9,7 @@ A robust, production-ready Flutter Todo application showcasing an **Offline-Firs
 - **Smart Synchronization**: Bidirectional sync between local SQLite and remote API.
 - **Conflict Resolution**: Version-based merging to ensure data integrity.
 - **Dynamic Theming**: Dark/Light mode support with persistence.
+- **Multi-Language Support**: English and Hindi with dynamic language switching and persistence.
 - **Rich UI/UX**: Modern Material 3 cards, smooth animations, and optimized keyboard handling.
 - **Debug Tools**: Built-in Drift DB Viewer to inspect local database state in real-time.
 
@@ -22,7 +23,9 @@ The project follows **Clean Architecture** principles, separated into three dist
 graph TD
     subgraph "Presentation Layer"
         UI[Flutter UI Components]
-        Bloc[Todo BLoC]
+        TodoBloc[Todo BLoC]
+        ThemeBloc[Theme BLoC]
+        LocaleBloc[Locale BLoC]
     end
 
     subgraph "Domain Layer (Core Logic)"
@@ -38,8 +41,10 @@ graph TD
         SyncMgr[Sync Manager]
     end
 
-    UI <--> Bloc
-    Bloc --> UC
+    UI <--> TodoBloc
+    UI <--> ThemeBloc
+    UI <--> LocaleBloc
+    TodoBloc --> UC
     UC --> RepoInt
     RepoImpl -- implements --> RepoInt
     RepoImpl --> LDS
@@ -113,8 +118,10 @@ sequenceDiagram
 | :--- | :--- |
 | **Flutter** | Cross-platform framework |
 | **Drift (Moor)** | Reactive SQLite persistence |
-| **Flutter BLoC** | State management |
+| **Flutter BLoC** | State management (TodoBloc, ThemeBloc, LocaleBloc) |
 | **GetIt** | Dependency Injection |
+| **SharedPreferences** | Persisting theme and locale preferences |
+| **i69n** | Type-safe internationalization with code generation |
 | **Http** | Networking |
 | **Connectivity Plus** | Real-time network monitoring |
 | **Drift DB Viewer** | Debugging utility |
@@ -126,18 +133,52 @@ sequenceDiagram
 ```text
 lib/
 ├── core/               # Shared logic, constants, and sync manager
+│   ├── database/       # Drift database setup
+│   ├── localization/   # i69n translations (en, hi)
+│   ├── network/        # Network client and connectivity
+│   ├── sync/           # Sync manager
+│   ├── theme/          # App theme definitions
+│   └── widgets/        # Shared widgets (BlocProvidersContainer)
 ├── features/
 │   ├── todo/           # Todo Feature (Clean Arch)
 │   │   ├── domain/     # Entities and Use Cases
 │   │   ├── data/       # Models, Repositories, and Data Sources
 │   │   └── presentation/ # BLoC and UI Components
 │   ├── theme/          # Theme Feature
-│   │   ├── data/       # Theme Persistence
+│   │   ├── domain/     # Theme repository interface
+│   │   ├── data/       # Theme persistence with SharedPreferences
 │   │   └── presentation/ # ThemeBloc
+│   ├── locale/         # Locale/Language Feature
+│   │   ├── domain/     # Locale repository interface
+│   │   ├── data/       # Locale persistence with SharedPreferences
+│   │   └── presentation/ # LocaleBloc
 │   └── settings/       # Settings Feature
-│       └── presentation/ # Settings UI
+│       └── presentation/ # Settings UI (Theme & Language selectors)
 └── injection_container.dart # Dependency Injection setup
 ```
+
+---
+
+## 🌐 Localization
+
+The app supports **dynamic language switching** with full persistence:
+
+### Supported Languages:
+- 🇬🇧 **English** (en)
+- 🇮🇳 **Hindi** (hi) - हिन्दी
+
+### Features:
+- **Dynamic Switching**: Change language in Settings → Language dropdown
+- **Persistence**: Language preference persists across app restarts
+- **Real-time Updates**: App immediately updates all text when language changes
+- **Type-safe**: Uses i69n for generated type-safe translation classes
+
+### Adding a New Language:
+1. Create `lib/core/localization/translation/translations_<locale>.i69n.yaml`
+2. Copy structure from `translations.i69n.yaml` and translate values
+3. Register locale in `lib/core/localization/app_localization.dart`
+4. Add to Settings page dropdown
+5. Run: `flutter pub run build_runner build --delete-conflicting-outputs`
 
 ---
 

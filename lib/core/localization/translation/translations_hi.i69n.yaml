@@ -35,6 +35,8 @@ todo:
 settings:
   title: "सेटिंग्स"
   darkMode: "डार्क मोड"
+  language: "भाषा"
+  languageSubtitle: "अपनी पसंदीदा भाषा चुनें"
   dataManagement: "डेटा प्रबंधन"
   syncNow: "अभी समन्वयित करें"
   syncNowSubtitle: "रिमोट सर्वर के साथ जबरन समन्वयन करें"
@@ -48,6 +50,8 @@ settings:
   clearDialogConfirm: "साफ़ करें"
   dataCleared: "स्थानीय डेटा साफ़ किया गया"
   syncStarted: "समन्वयन शुरू हो गया..."
+  languageEnglish: "English (अंग्रेज़ी)"
+  languageHindi: "हिन्दी"
   
 accessibility:
   switchToLight: "लाइट मोड पर स्विच करें"

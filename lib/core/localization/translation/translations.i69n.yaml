@@ -35,6 +35,8 @@ todo:
 settings:
   title: "Settings"
   darkMode: "Dark Mode"
+  language: "Language"
+  languageSubtitle: "Choose your preferred language"
   dataManagement: "Data Management"
   syncNow: "Sync Now"
   syncNowSubtitle: "Force sync with remote server"
@@ -48,6 +50,8 @@ settings:
   clearDialogConfirm: "Clear"
   dataCleared: "Local data cleared"
   syncStarted: "Sync started..."
+  languageEnglish: "English"
+  languageHindi: "हिन्दी (Hindi)"
   
 accessibility:
   switchToLight: "Switch to Light Mode"

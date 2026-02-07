@@ -202,6 +202,8 @@ class SettingsTranslations_hi extends SettingsTranslations {
   const SettingsTranslations_hi(this._parent) : super(_parent);
   String get title => "सेटिंग्स";
   String get darkMode => "डार्क मोड";
+  String get language => "भाषा";
+  String get languageSubtitle => "अपनी पसंदीदा भाषा चुनें";
   String get dataManagement => "डेटा प्रबंधन";
   String get syncNow => "अभी समन्वयित करें";
   String get syncNowSubtitle => "रिमोट सर्वर के साथ जबरन समन्वयन करें";
@@ -216,6 +218,8 @@ class SettingsTranslations_hi extends SettingsTranslations {
   String get clearDialogConfirm => "साफ़ करें";
   String get dataCleared => "स्थानीय डेटा साफ़ किया गया";
   String get syncStarted => "समन्वयन शुरू हो गया...";
+  String get languageEnglish => "English (अंग्रेज़ी)";
+  String get languageHindi => "हिन्दी";
   Object operator [](String key) {
     var index = key.indexOf('.');
     if (index > 0) {
@@ -227,6 +231,10 @@ class SettingsTranslations_hi extends SettingsTranslations {
         return title;
       case 'darkMode':
         return darkMode;
+      case 'language':
+        return language;
+      case 'languageSubtitle':
+        return languageSubtitle;
       case 'dataManagement':
         return dataManagement;
       case 'syncNow':
@@ -253,6 +261,10 @@ class SettingsTranslations_hi extends SettingsTranslations {
         return dataCleared;
       case 'syncStarted':
         return syncStarted;
+      case 'languageEnglish':
+        return languageEnglish;
+      case 'languageHindi':
+        return languageHindi;
       default:
         return super[key];
     }

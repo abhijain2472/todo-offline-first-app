@@ -201,6 +201,8 @@ class SettingsTranslations implements i69n.I69nMessageBundle {
   const SettingsTranslations(this._parent);
   String get title => "Settings";
   String get darkMode => "Dark Mode";
+  String get language => "Language";
+  String get languageSubtitle => "Choose your preferred language";
   String get dataManagement => "Data Management";
   String get syncNow => "Sync Now";
   String get syncNowSubtitle => "Force sync with remote server";
@@ -215,6 +217,8 @@ class SettingsTranslations implements i69n.I69nMessageBundle {
   String get clearDialogConfirm => "Clear";
   String get dataCleared => "Local data cleared";
   String get syncStarted => "Sync started...";
+  String get languageEnglish => "English";
+  String get languageHindi => "हिन्दी (Hindi)";
   Object operator [](String key) {
     var index = key.indexOf('.');
     if (index > 0) {
@@ -226,6 +230,10 @@ class SettingsTranslations implements i69n.I69nMessageBundle {
         return title;
       case 'darkMode':
         return darkMode;
+      case 'language':
+        return language;
+      case 'languageSubtitle':
+        return languageSubtitle;
       case 'dataManagement':
         return dataManagement;
       case 'syncNow':
@@ -252,6 +260,10 @@ class SettingsTranslations implements i69n.I69nMessageBundle {
         return dataCleared;
       case 'syncStarted':
         return syncStarted;
+      case 'languageEnglish':
+        return languageEnglish;
+      case 'languageHindi':
+        return languageHindi;
       default:
         return key;
     }

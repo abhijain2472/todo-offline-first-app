@@ -5,6 +5,9 @@ import '../../../../injection_container.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/localization/app_localization.dart';
 import '../../../theme/presentation/bloc/theme_bloc.dart';
+import '../../../locale/presentation/bloc/locale_bloc.dart';
+import '../../../locale/presentation/bloc/locale_event.dart';
+import '../../../locale/presentation/bloc/locale_state.dart';
 import '../../../todo/presentation/bloc/todo_bloc.dart';
 import '../../../todo/presentation/bloc/todo_event.dart';
 
@@ -18,12 +21,14 @@ class SettingsPage extends StatelessWidget {
         title: Text(context.translations.settings.title),
       ),
       body: ListView(
-        children: const [
-          _ThemeSection(),
-          Divider(),
-          _DataSection(),
-          Divider(),
-          _DeveloperSection(),
+        children: [
+          const _ThemeSection(),
+          const Divider(),
+          const _LanguageSection(),
+          const Divider(),
+          const _DataSection(),
+          const Divider(),
+          const _DeveloperSection(),
         ],
       ),
     );
@@ -45,6 +50,42 @@ class _ThemeSection extends StatelessWidget {
             value: isDark,
             onChanged: (value) {
               context.read<ThemeBloc>().add(ToggleThemeEvent());
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _LanguageSection extends StatelessWidget {
+  const _LanguageSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<LocaleBloc, LocaleState>(
+      builder: (context, state) {
+        return ListTile(
+          leading: const Icon(Icons.language),
+          title: Text(context.translations.settings.language),
+          subtitle: Text(context.translations.settings.languageSubtitle),
+          trailing: DropdownButton<Locale>(
+            value: state.locale,
+            underline: const SizedBox(),
+            items: [
+              DropdownMenuItem(
+                value: const Locale('en'),
+                child: Text(context.translations.settings.languageEnglish),
+              ),
+              DropdownMenuItem(
+                value: const Locale('hi'),
+                child: Text(context.translations.settings.languageHindi),
+              ),
+            ],
+            onChanged: (Locale? newLocale) {
+              if (newLocale != null) {
+                context.read<LocaleBloc>().add(ChangeLocaleEvent(newLocale));
+              }
             },
           ),
         );

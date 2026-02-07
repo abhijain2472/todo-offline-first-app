@@ -13,7 +13,7 @@ This document provides a high-level overview of the application's architecture, 
 - **Local Database**: [Drift](https://drift.simonbinder.eu/) (Reactive persistence library for Flutter/Dart, SQLite-based)
 - **State Management**: [flutter_bloc](https://pub.dev/packages/flutter_bloc)
 - **Dependency Injection**: [get_it](https://pub.dev/packages/get_it)
-- **Persistence**: `shared_preferences` for key-value storage (Theme settings)
+- **Persistence**: `shared_preferences` for key-value storage (Theme and Locale settings)
 - **Networking**: `http` package with a custom **`NetworkClient` abstraction** for centralized logging and error handling
 - **Localization**: [i69n](https://pub.dev/packages/i69n) for internationalization with generated type-safe translations
 - **Architecture**: **Clean Architecture** (Domain, Data, Presentation layers)
@@ -34,14 +34,18 @@ This document provides a high-level overview of the application's architecture, 
   - `TodoLocalDataSource`: Interfaces with Drift (SQLite).
   - `TodoRemoteDataSource`: Interfaces with the Backend API via `NetworkClient`.
 
-### 3. Presentation Layer (`lib/features/todo/presentation`, `lib/features/theme/presentation`, `lib/features/settings`)
+### 3. Presentation Layer (`lib/features/todo/presentation`, `lib/features/theme/presentation`, `lib/features/locale/presentation`, `lib/features/settings`)
 - **features/todo**:
     - **BLoC**: `TodoBloc` manages the state of the Todo list and handles events.
     - **Pages**: `TodoListScreen`, `AddEditTodoScreen`.
 - **features/theme**:
     - **BLoC**: `ThemeBloc` manages app-wide theme state (Light/Dark/System).
+- **features/locale**:
+    - **BLoC**: `LocaleBloc` manages app language/locale state with SharedPreferences persistence.
+    - **Repository**: `LocaleRepository` handles locale persistence.
+    - **Data Source**: `LocaleLocalDataSource` persists locale selection.
 - **features/settings**:
-    - **Pages**: `SettingsPage` centralized configuration screen.
+    - **Pages**: `SettingsPage` centralized configuration screen with theme and language selectors.
 
 ### 4. Core Layer (`lib/core`)
 - **Sync**: `SyncManager` handles the high-level orchestration of Pushing and Pulling changes, including **automatic sync on connectivity recovery**.
@@ -50,6 +54,8 @@ This document provides a high-level overview of the application's architecture, 
   - `NetworkInfo`: Connectivity checks and change streams.
   - `NetworkClient`: Abstract interface for HTTP operations.
   - `HttpNetworkClient`: Implementation with centralized logging and status-code error checking.
+- **Widgets**:
+  - `BlocProvidersContainer`: Centralized widget that provides all BLoC instances (TodoBloc, ThemeBloc, LocaleBloc) to the widget tree.
 - **Localization**: 
   - `AppLocalization`: Localization setup with i69n package.
   - `translations.i69n.yaml`: Source file containing all translatable strings (English).
@@ -57,6 +63,7 @@ This document provides a high-level overview of the application's architecture, 
   - `translations.i69n.dart` & `translations_hi.i69n.dart`: Generated type-safe translation classes.
   - All UI strings are accessed via `context.translations` extension method.
   - Supported locales: English (en), Hindi (hi).
+  - **Dynamic Language Switching**: Users can change app language from Settings page, persisted via SharedPreferences.
   - **To add/modify translations**: 
     1. Edit `lib/core/localization/translation/translations.i69n.yaml`
     2. Run `flutter pub run build_runner build --delete-conflicting-outputs` to regenerate the `.dart` file
@@ -66,7 +73,14 @@ This document provides a high-level overview of the application's architecture, 
 
 ## 🌐 Localization
 
-The app uses the **i69n** package for type-safe internationalization.
+The app uses the **i69n** package for type-safe internationalization with **dynamic language switching**.
+
+### Features:
+- **Supported Languages**: English (en), Hindi (hi)
+- **Dynamic Switching**: Users can change language from Settings → Language dropdown
+- **Persistence**: Selected language is saved to SharedPreferences and persists across app restarts
+- **Real-time Updates**: App immediately updates all text when language is changed
+- **Type-safe**: All translations are generated as type-safe Dart classes
 
 ### Structure:
 - **Source File**: `lib/core/localization/translation/translations.i69n.yaml`
@@ -103,7 +117,44 @@ Text(context.translations.settings.syncNow)
 1. Create a new file: `translations_<locale>.i69n.yaml` (e.g., `translations_es.i69n.yaml` for Spanish)
 2. Copy the structure from `translations.i69n.yaml` and translate the values
 3. Update `lib/core/localization/app_localization.dart` to register the new locale
-4. Run build_runner to generate the new translation classes
+4. Add the new locale to the Settings page dropdown
+5. Run build_runner to generate the new translation classes
+
+---
+
+## 🎯 State Management Architecture
+
+### BLoC Pattern
+The app uses the **BLoC (Business Logic Component)** pattern for state management across all features:
+
+#### Active BLoCs:
+1. **TodoBloc** (`lib/features/todo/presentation/bloc/`)
+   - Manages todo list state (loading, loaded, error)
+   - Handles CRUD operations and sync events
+   - Watches real-time database changes via Drift streams
+
+2. **ThemeBloc** (`lib/features/theme/presentation/bloc/`)
+   - Manages theme mode (Light/Dark)
+   - Persists theme preference to SharedPreferences
+   - Supports toggle and set operations
+
+3. **LocaleBloc** (`lib/features/locale/presentation/bloc/`)
+   - Manages app language/locale state
+   - Persists locale selection to SharedPreferences
+   - Triggers real-time UI updates on language change
+
+### BLoC Provider Organization
+- **Centralized Container**: `BlocProvidersContainer` (`lib/core/widgets/bloc_providers_container.dart`)
+  - Encapsulates all BLoC provider setup
+  - Initializes BLoCs with their initial load events
+  - Keeps `main.dart` clean and focused
+  - Easy to extend with new BLoCs
+
+### Benefits:
+- **Separation of Concerns**: Business logic separated from UI
+- **Testability**: BLoCs can be tested independently
+- **Predictability**: State changes are explicit and traceable
+- **Reusability**: BLoCs can be reused across different screens
 
 ---
 
