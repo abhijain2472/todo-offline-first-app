@@ -52,10 +52,11 @@ This document provides a high-level overview of the application's architecture, 
   - `HttpNetworkClient`: Implementation with centralized logging and status-code error checking.
 - **Localization**: 
   - `AppLocalization`: Localization setup with i69n package.
-  - `translations.i69n.yaml`: Source file containing all translatable strings.
-  - `translations.i69n.dart`: Generated type-safe translation classes.
+  - `translations.i69n.yaml`: Source file containing all translatable strings (English).
+  - `translations_hi.i69n.yaml`: Hindi translation file.
+  - `translations.i69n.dart` & `translations_hi.i69n.dart`: Generated type-safe translation classes.
   - All UI strings are accessed via `context.translations` extension method.
-  - Supported locales: English (en) - more can be added by creating additional `.yaml` files.
+  - Supported locales: English (en), Hindi (hi).
   - **To add/modify translations**: 
     1. Edit `lib/core/localization/translation/translations.i69n.yaml`
     2. Run `flutter pub run build_runner build --delete-conflicting-outputs` to regenerate the `.dart` file

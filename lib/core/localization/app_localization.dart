@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:todo_offline_first_app/core/localization/translation/translations.i69n.dart';
+import 'package:todo_offline_first_app/core/localization/translation/translations_hi.i69n.dart';
 
 export 'translation/translations.i69n.dart';
 
 final _translations = <String, Translations Function()>{
   'en': () => const Translations(),
+  'hi': () => const Translations_hi(),
 };
 
 class AppLocalization {
